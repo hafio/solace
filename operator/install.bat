@@ -2,9 +2,7 @@
 
 set /A wait_time=3
 
-set base_url=https://github.com/operator-framework/operator-lifecycle-manager/releases/download
-set release=v0.31.0
-set url=%base_url%/%release%
+call env.bat
 set /A retries=100
 
 rem ####################################################################################################

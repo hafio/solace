@@ -13,29 +13,15 @@ read -p "Press any key to continue"
 
 set -e
 
-default_base_url=https://github.com/operator-framework/operator-lifecycle-manager/releases/download
 
 ### hamlyn edit - added below lines to default first position argument to 'v0.31.0'
-##### sets variable ${release}
-release=${1:-v0.31.0}
-##### repositions / shifts all positional arguments
-set -- ${release} ${@:2}
-
-if [[ ${#@} -lt 1 || ${#@} -gt 2 ]]; then
-    echo "Usage: $0 version [base_url]"
-    echo "* version: the github release version"
-    echo "* base_url: the github base URL (Default: $default_base_url)"
-    exit 1
-fi
+source env.sh
 
 if kubectl get deployment olm-operator -n openshift-operator-lifecycle-manager > /dev/null 2>&1; then
     echo "OLM is already installed in a different configuration. This is common if you are not running a vanilla Kubernetes cluster. Exiting..."
     exit 1
 fi
 
-release="$1"
-base_url="${2:-${default_base_url}}"
-url="${base_url}/${release}"
 namespace=olm
 
 if kubectl get deployment olm-operator -n ${namespace} > /dev/null 2>&1; then
