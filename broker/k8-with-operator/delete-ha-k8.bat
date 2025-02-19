@@ -20,3 +20,5 @@ del .ha
 kubectl.exe delete pvc -n %namespace% data-%broker%-pubsubplus-b-0
 kubectl.exe delete pvc -n %namespace% data-%broker%-pubsubplus-m-0
 kubectl.exe delete pvc -n %namespace% data-%broker%-pubsubplus-p-0
+
+kubectl.exe get pods,pvc -n %namespace%

@@ -20,3 +20,5 @@ rm -f .ha
 echo kubectl delete pvc -n ${namespace} data-${broker}-pubsubplus-b-0
 echo kubectl delete pvc -n ${namespace} data-${broker}-pubsubplus-m-0
 echo kubectl delete pvc -n ${namespace} data-${broker}-pubsubplus-p-0
+
+kubectl get pods,pvc -n ${namespace}
