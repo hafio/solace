@@ -1,7 +1,6 @@
 @echo off
 
-set broker=ha-broker
-set namespace=solace
+call env.bat
 
 if "%broker%"=="" (
 	kubectl.exe get eventbroker -n solace -o jsonpath="{.items[0].metadata.name}" > .tmp

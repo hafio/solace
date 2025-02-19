@@ -2,8 +2,7 @@
 
 setlocal
 
-set broker-name=ha-broker
-set namespace=solace
+call env.bat
 
 if "%1"=="p" ( 
 	set node=%1
@@ -18,4 +17,4 @@ if "%1"=="p" (
 	exit
 ) 
 
-kubectl.exe exec -it %broker-name%-pubsubplus-%node%-0 -n %namespace% -- /usr/sw/loads/currentload/bin/cli -A
+kubectl.exe exec -it %broker%-pubsubplus-%node%-0 -n %namespace% -- /usr/sw/loads/currentload/bin/cli -A
