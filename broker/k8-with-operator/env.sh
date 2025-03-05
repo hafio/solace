@@ -11,5 +11,9 @@ metadata:
 spec:
   redundancy: true
   image:
-    repository: registry.hamaster.handy:45443/solace/pubsubplus/solace-ent
-    tag: 10.8.1.209"
+    repository: solace-pubsub-enterprise
+    tag: 10.8.1.209
+#  containers:
+#  - name: solace-broker-container
+#    imagePullPolicy: Never # Never / IfNotPresent / Always
+"
