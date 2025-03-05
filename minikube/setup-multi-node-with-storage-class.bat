@@ -13,9 +13,9 @@ if %errorlevel% equ 0 (
 	minikube.exe start -p %cluster-name% --nodes %nodes% --cpus %cpu% --memory %mem%
 )
 
-minikube addons enable metrics-server -p %cluster-name%
-minikube addons enable volumesnapshots -p %cluster-name%
-minikube addons enable csi-hostpath-driver -p %cluster-name%
+minikube.exe addons enable metrics-server -p %cluster-name%
+minikube.exe addons enable volumesnapshots -p %cluster-name%
+minikube.exe addons enable csi-hostpath-driver -p %cluster-name%
 
 (
 echo apiVersion: storage.k8s.io/v1
