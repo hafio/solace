@@ -10,6 +10,8 @@ Refer to https://solace.com/products/event-broker/software/getting-started/ for 
 
 # SSL/TLS Certificate
 
+Refer to [this project](https://github.com/hafio/solace-psg/tree/main/ssl-certs) to generate SSL certificates.
+
 `server.crt` must consist of the following content:
 1. Server Certificate in PEM format
 2. Server Key
