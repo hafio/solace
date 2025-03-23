@@ -1,0 +1,442 @@
+{
+	"info": {
+		"_postman_id": "1722e1b5-fd81-4b4d-b57e-4d89d7b49806",
+		"name": "Setup Distributed Trace",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24948774"
+	},
+	"item": [
+		{
+			"name": "Configure Msg VPN",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"authenticationBasicType\": \"internal\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set username and user password",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"password\": \"{{msg_password}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/clientUsernames/{{msg_username}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"clientUsernames",
+						"{{msg_username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure user profile",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"allowGuaranteedMsgReceiveEnabled\": true,\n  \"allowGuaranteedMsgSendEnabled\": true,\n  \"rejectMsgToSenderOnNoSubscriptionMatchEnabled\": true\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/clientProfiles/{{msg_username}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"clientProfiles",
+						"{{msg_username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure Telemetry Profile - 1 create profile",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"msgVpnName\": \"{{msg_vpn}}\",\n  \"receiverAclConnectDefaultAction\": \"allow\",\n  \"receiverEnabled\": true,\n  \"telemetryProfileName\": \"{{telemetry_profile}}\",\n  \"traceEnabled\": true\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/telemetryProfiles",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"telemetryProfiles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure Telemetry Profile - 2 create filter",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"enabled\": true,\n  \"msgVpnName\": \"{{msg_vpn}}\",\n  \"telemetryProfileName\": \"{{telemetry_profile}}\",\n  \"traceFilterName\": \"{{trace_filter}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/telemetryProfiles/{{telemetry_profile}}/traceFilters",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"telemetryProfiles",
+						"{{telemetry_profile}}",
+						"traceFilters"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure Telemetry Profile - 3 Add sub filter",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"msgVpnName\": \"{{msg_vpn}}\",\n  \"subscription\": \">\",\n  \"subscriptionSyntax\": \"smf\",\n  \"telemetryProfileName\": \"{{telemetry_profile}}\",\n  \"traceFilterName\": \"{{trace_filter}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/telemetryProfiles/trace/traceFilters/{{msg_username}}/subscriptions",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"telemetryProfiles",
+						"trace",
+						"traceFilters",
+						"{{msg_username}}",
+						"subscriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure Collector client username",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"aclProfileName\": \"#telemetry-{{telemetry_profile}}\",\n  \"clientProfileName\": \"#telemetry-{{telemetry_profile}}\",\n  \"clientUsername\": \"{{username}}\",\n  \"enabled\": true,\n  \"msgVpnName\": \"{{msg_vpn}}\",\n  \"password\": \"{{password}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/clientUsernames",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"clientUsernames"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure messaging Queue - create queue",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"msgVpnName\": \"{{msg_vpn}}\",\n        \"egressEnabled\": true,\n        \"ingressEnabled\":true,\n        \"permission\": \"delete\",\n        \"queueName\": \"{{queue_name}}\"\n        \n    }"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/queues",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"queues"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Configure messaging Queue - add topic subscription",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"msgVpnName\": \"{{msg_vpn}}\",\n  \"queueName\": \"{{queue_name}}\",\n  \"subscriptionTopic\": \"solace/tracing\"\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/config/msgVpns/{{msg_vpn}}/queues/{{queue_name}}/subscriptions",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"config",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"queues",
+						"{{queue_name}}",
+						"subscriptions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check configuration",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic YWRtaW46YWRtaW4="
+					}
+				],
+				"url": {
+					"raw": "http://{{host}}:{{semp_port}}/SEMP/v2/monitor/msgVpns/{{msg_vpn}}/queues/%23telemetry-{{telemetry_profile}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{semp_port}}",
+					"path": [
+						"SEMP",
+						"v2",
+						"monitor",
+						"msgVpns",
+						"{{msg_vpn}}",
+						"queues",
+						"%23telemetry-{{telemetry_profile}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
