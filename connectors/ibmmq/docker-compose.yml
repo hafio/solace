@@ -1,0 +1,30 @@
+
+version: "3.9"
+services:
+
+  solace-pubsub-connector-ibmmq:
+    image: solace/solace-pubsub-connector-ibmmq:2.9.0
+    environment:
+      SOLACE_JAVA_HOST: ${SOLACE_JAVA_HOST:-host.docker.internal:61554}
+      IBM_MQ_CONNNAME: '${IBM_MQ_CONNNAME:-host.docker.internal(1414)}'
+      # Create a read-only user for the healthcheck
+      # Note: This will override all users defined in config files.
+      SOLACE_CONNECTOR_SECURITY_USERS_0_NAME: ${HEALTHCHECK_USER_NAME:-default}
+      SOLACE_CONNECTOR_SECURITY_USERS_0_PASSWORD: ${HEALTHCHECK_USER_PASSWORD:-default}
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q -O - http://${HEALTHCHECK_USER_NAME}:${HEALTHCHECK_USER_PASSWORD}@localhost:8090/actuator/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+    ports:
+      - '8090:8090'
+    volumes:
+      - type: bind
+        source: ./libs/
+        target: /app/external/libs/
+        read_only: true
+      - type: bind
+        source: ./config/
+        target: /app/external/spring/config/
+        read_only: true
