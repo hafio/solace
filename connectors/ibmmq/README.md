@@ -34,6 +34,10 @@ COPY libs /app/external/libs
 > MQ Connector image v2.9.0 (check solace website for latest version) imported locally to `solace/solace-pubsub-connector-ibmmq:2.9.0` <br>
 > All above libraries are in `libs` folder relatively to `Dockerfile`
 
-Execute `docker build -t sol-mq-conn:2.9.0 .`
-> take note of the dot at the end. It is mandatory
+Execute
+```
+docker build -t sol-mq-conn:2.9.0 .
+```
+> take note of the **dot** at the end. It is mandatory
+
 The image `sol-mq-conn:2.9.0` should be available locally. You can export / save as required.
