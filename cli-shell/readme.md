@@ -37,12 +37,12 @@ Usage: cli [OPTION]
 ```
 
 # Examples
-To execute a Solace CLI script without logging into CLI and typing `source script [filename]`:
-`/usr/sw/loads/currentload/bin/cli -Apes [filename]`
+To execute a Solace CLI script without logging into CLI and executing `source script <filename> stop-on-error no-prompt`, you can do this:
+`/usr/sw/loads/currentload/bin/cli -Apes <filename>` or docker equivalent `docker exec -it <container-name> /usr/sw/loads/currentload/bin/cli -Apes <filename>`
 > -A: force authorization <br>
 > -p: disable prompts <br>
 > -e: auto exit <br>
-> -s: execute script <br>
+> -s: execute script where &lt;filename&gt; is relative to `/usr/sw/jail/cliscripts` <br>
 
 Also possible to do:
 `/usr/sw/loads/currentload/bin/cli -Apes example.cli` where:
@@ -50,4 +50,4 @@ content of `example.cli` is:
 ```bash
 source script another.cli
 ```
-content of `another.cli` is some other cli commands
+content of `another.cli` is some other cli commands, but this seems alittle redundant :)
