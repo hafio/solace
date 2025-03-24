@@ -23,3 +23,17 @@ This project captures the steps to setup Solace <> IBM MQ Connector.
 - https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
 - https://mvnrepository.com/artifact/jakarta.jms/jakarta.jms-api
 - https://mvnrepository.com/artifact/org.json/json
+
+# Building complete image
+
+If you need to use a complete image instead, create `Dockerfile` with the below content:
+```Dockerfile
+FROM solace/solace-pubsub-connector-ibmmq:2.9.0
+COPY libs /app/external/libs
+```
+> MQ Connector image v2.9.0 (check solace website for latest version) imported locally to `solace/solace-pubsub-connector-ibmmq:2.9.0` <br>
+> All above libraries are in `libs` folder relatively to `Dockerfile`
+
+Execute `docker build -t sol-mq-conn:2.9.0 .`
+> take note of the dot at the end. It is mandatory
+The image `sol-mq-conn:2.9.0` should be available locally. You can export / save as required.
