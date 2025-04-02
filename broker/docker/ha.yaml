@@ -1,0 +1,126 @@
+name: sol-ps-ha
+
+networks:
+  hanet: {}
+
+x-environment:
+  &default-environment
+  username_admin_globalaccesslevel: admin
+  username_admin_password: ${ADMIN_PASSWORD:-admin}
+  system_scaling_maxconnectioncount: 100
+  redundancy_enable: "yes"
+  redundancy_authentication_presharedkey_key: 'JM2gWU1wU9563gzDYjO3jFA9UJO9QhYVN7SAOFqfGAk='
+  redundancy_group_node_primary_connectvia: primary
+  redundancy_group_node_primary_nodetype: message_routing
+  redundancy_group_node_backup_connectvia: backup
+  redundancy_group_node_backup_nodetype: message_routing
+  redundancy_group_node_monitoring_connectvia: monitoring
+  redundancy_group_node_monitoring_nodetype: monitoring
+
+x-common:
+  &default-common
+  image: solace/solace-pubsub-standard:${TAG:-latest}
+  shm_size: 1g
+  networks:
+    - hanet
+
+services:
+
+  primary:
+    container_name: primary
+    hostname: primary
+    ports:
+      - "212:2222"
+    volumes:
+      - storage-group-1:/var/lib/solace
+    environment:
+      << : *default-environment
+      routername: primary
+      configsync_enable: "yes"
+      redundancy_matelink_connectvia: backup
+      redundancy_activestandbyrole: primary
+      service_semp_tlsport: 1943
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 1048576
+    << : *default-common
+
+  backup:
+    container_name: backup
+    hostname: backup
+    ports:
+      - "312:2222"
+    volumes:
+      - storage-group-2:/var/lib/solace
+    environment:
+      << : *default-environment
+      routername: backup
+      configsync_enable: "yes"
+      redundancy_matelink_connectvia: primary
+      redundancy_activestandbyrole: backup
+      service_semp_tlsport: 1943
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 1048576
+    << : *default-common
+
+  monitoring:
+    container_name: monitoring
+    hostname: monitoring
+    ports:
+      - "412:2222"
+    volumes:
+      - storage-group-3:/var/lib/solace
+    environment:
+      << : *default-environment
+      routername: monitoring
+      nodetype: monitoring
+      service_semp_tlsport: 1943
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 8192
+    << : *default-common
+
+  lb:
+    container_name: lb
+    image: 'haproxy:latest'
+    user: 0:0
+    volumes:
+      - ./assertLeader.perl:/assertLeader.perl
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+    entrypoint:
+      - /bin/bash
+      - "-c"
+      - "perl /assertLeader.perl"
+    ports:
+      - '48008:8008'
+      - '41443:1443'
+      - '41943:1943'
+      - '41883:1883'
+      - '45671:5671'
+      - '45672:5672'
+      - '48000:8000'
+      - '48080:8080'
+      - '48443:8443'
+      - '48883:8883'
+      - '49000:9000'
+      - '49443:9443'
+      - '45554:55555'
+      - '45003:55003'
+      - '45443:55443'
+      - '41936:1936'
+    networks:
+      - hanet
+
+volumes:
+  storage-group-1:
+  storage-group-2:
+  storage-group-3:

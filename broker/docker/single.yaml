@@ -1,0 +1,62 @@
+# docker-compose -f PubSubStandard_singleNode.yml up
+name: SolaceBroker
+
+services:
+  primary:
+    container_name: SingleNode
+    image: registry.hamaster.handy:5443/solace/solace-pubsub-standard:latest
+    volumes:
+      - "storage-group:/var/lib/solace"
+    shm_size: 1g
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 6592
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #Web transport
+      - '58008:8008'
+      #Web transport over TLS
+      - '51443:1443'
+      #SEMP over TLS
+      - '51943:1943'
+      #MQTT Default VPN
+      - '51883:1883'
+      #AMQP Default VPN over TLS
+      - '55671:5671'
+      #AMQP Default VPN
+      - '55672:5672'
+      #MQTT Default VPN over WebSockets
+      - '58000:8000'
+      #MQTT Default VPN over WebSockets / TLS
+      - '58443:8443'
+      #MQTT Default VPN over TLS
+      - '58883:8883'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '58080:8080'
+      - '59000:9000'
+      #REST Default VPN over TLS
+      - '59443:9443'
+      #SMF
+      - '55554:55555'
+      #SMF Compressed
+      - '55003:55003'
+      #SMF over TLS
+      - '55443:55443'
+      #SSH connection to CLI
+      - '52222:2222'
+    environment:
+      - username_admin_globalaccesslevel=admin
+      - username_admin_password=admin
+      - system_scaling_maxconnectioncount=100
+
+volumes:
+  storage-group:
