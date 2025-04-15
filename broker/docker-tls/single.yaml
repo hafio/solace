@@ -3,10 +3,10 @@ name: project-solace-pubsubplus
 services:
   primary:
     container_name: pubSubEntSingleNode
-    image: registry.hamaster.handy:45443/solace/pubsubplus/solace-ent:10.9.1.150
+    image: registry.hamaster.handy:45443/solace/pubsubplus/solace-ent:10.8.1.241
     volumes:
       - "./storage-group:/var/lib/solace"
-      - "./server.crt:/secret/server.crt" 
+      - "./tls-comb.crt:/secret/server.crt" 
     shm_size: 1g
     ulimits:
       core: -1

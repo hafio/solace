@@ -1,12 +1,23 @@
 @echo off
 
-call env.bat
-
-if "%broker%"=="" (
-	kubectl.exe get eventbroker -n solace -o jsonpath="{.items[0].metadata.name}" > .tmp
-	set /p broker=<.tmp
+if NOT "%~1"=="ha" (
+	if NOT "%~1"=="sa" (
+		call %~dp0%env.bat
+		kubectl.exe get eventbroker -n solace -o jsonpath="{.items[0].metadata.name}" > .tmp
+		set /p broker=<.tmp
+		goto :GETSECRET
+	) else (
+		goto :HASABROKER
+	)
+) else (
+	goto :HASABROKER
 )
 
+:HASABROKER
+set broker-type=%~1
+call %~dp0%env.bat
+
+:GETSECRET
 kubectl.exe get eventbroker %broker% -n %namespace% -o jsonpath="{.status.broker.adminCredentialsSecret}" > .tmp
 set /p secname=<.tmp
 
