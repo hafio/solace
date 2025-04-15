@@ -1,9 +1,9 @@
 @echo off
 
 set cluster-name=mk
-set nodes=4
+set nodes=6
 set cpu=2
-set mem=4096
+set mem=4092
 
 for /f %%i in ('minikube.exe profile list -o json') do set JSON=%%i
 echo %JSON% | findstr /C:"\"Name\":\"mk\"" >nul
@@ -35,3 +35,4 @@ kubectl.exe apply -f .sc.yaml
 del .sc.yaml
 
 kubectl.exe patch sc standard -p "{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}"
+rem kubectl.exe patch sc standard -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'
