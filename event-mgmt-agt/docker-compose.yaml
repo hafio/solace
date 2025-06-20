@@ -1,0 +1,83 @@
+name: sol-ema
+
+services:
+  broker:
+    container_name: sol-broker-single
+    # my own docker image repo so definitely need to change this to something public accessible
+    image: registry.hamaster.handy:45443/solace/pubsubplus/solace-ent:10.8.1.241
+    volumes:
+#      - "sol-storage:/var/lib/solace"
+#      - "./tls-comb.crt:/secret/server.crt"
+    shm_size: 1g
+    ulimits:
+      core: -1
+      nofile: # get values from resource calculator
+        soft: 6280
+        hard: 42192
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+    #
+    # note all the usual ports are mapped to "unusual" ones due to my own environment.
+    #
+      #Web transport
+      - '58008:8008'
+      #Web transport over TLS
+      - '51443:1443'
+      #SEMP over TLS
+      - '51943:1943'
+      #MQTT Default VPN
+      - '51883:1883'
+      #AMQP Default VPN over TLS
+      - '55671:5671'
+      #AMQP Default VPN
+      - '55672:5672'
+      #MQTT Default VPN over WebSockets
+      - '58000:8000'
+      #MQTT Default VPN over WebSockets / TLS
+      - '58443:8443'
+      #MQTT Default VPN over TLS
+      - '58883:8883'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '58080:8080'
+      - '59000:9000'
+      #REST Default VPN over TLS
+      - '59443:9443'
+      #SMF
+      - '55554:55555'
+      #SMF Compressed
+      - '55003:55003'
+      #SMF over TLS
+      - '55443:55443'
+      #SSH connection to CLI
+      - '52222:2222'
+    environment:
+    # secrets should ideally go into docker secret management or use docker run + environment variables instead.
+      - username_admin_globalaccesslevel=admin
+      - username_admin_password=admin
+      - system_scaling_maxconnectioncount=1000
+      # comment out next 3 environment variables if no SSL/TLS certificate
+#      - tls_servercertificate_filepath=/secret/server.crt
+#      - webmanager_redirecthttp_enable=yes
+#      - webmanager_redirecthttp_overridetlsport=51943
+  ema:
+    image: 'solace/event-management-agent:latest'
+    container_name: event-management-agent
+    environment:
+    # should either follow the steps provided by Event Portal or use docker secrets management.
+    - 'Hamlyn_Laptop_SOLACE_SEMP_PASSWORD=admin'
+    volumes:
+    # get this config file from Event Portal.
+    - './config.yaml:/config/ema.yml'
+    ports:
+    - '58180:8180'
+    depends_on:
+    - broker
+#volumes:
+#  sol-storage:
