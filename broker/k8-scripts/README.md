@@ -94,3 +94,7 @@ Scripts are prefixed with a 3-digit number system:
 | `SOLBK_DOMAINCERT_FOLDER` | (none) | No | Folder containing Certificate Authority certificates to be loaded. This is used in conjunction with `$SOLBK_DOMAINCERT_FILES` |
 | `SOLBK_DOMAINCERT_FILES` | (none) | No | List of Certificate Authority certificates to be loaded into the broker. This will be applied by `051-load-domain-certs.sh`. |
 | `SOLBK_CLISCRIPTS_FOLDER` | cli | No | Path + Folder name of directory containing CLI scripts to be executed. This is used in `059-execute-cli.sh` |
+
+# Additional Helper Scripts
+
+(TODO)
