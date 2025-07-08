@@ -40,10 +40,10 @@ spec:
     maxSpoolUsage: ${SOLBK_SCALING_MAXPOOL:-10000}
     messagingNodeCpu: \"${SOLBK_MSGNODE_CPU:-2}\"
     messagingNodeMemory: ${SOLBK_MSGNODE_MEM:-3410Mi}
-  storage:
-    useStorageClass: ${SOLBK_STORAGECLASS:-solace-storage-class}
-    messagingNodeStorageSize: ${SOLBK_STORAGE_MSGNODE:-16100Mi}
-    monitorNodeStorageSize: ${SOLBK_STORAGE_MONNODE:-5000Mi}
+  storage:"
+  [[ -n "${SOLBK_STORAGECLASS}" ]] && echo "    useStorageClass: ${SOLBK_STORAGECLASS}"
+  echo "    messagingNodeStorageSize: ${SOLBK_STORAGE_MSGNODE}
+    monitorNodeStorageSize: ${SOLBK_STORAGE_MONNODE}
   timezone: \"Asia/Singapore\""
     [[ -n "${SOLBK_SVR_SECRET}" ]] && echo "  tls:
     serverTlsConfigSecret: ${SOLBK_SVR_SECRET}
@@ -51,7 +51,7 @@ spec:
     certFilename: tls.crt
     certKeyFilename: tls.key"
     
-    if [[ "${SOLBK_REDUNDANCY:-false}" == "true" ]]; then
+    if [[ -n "${SOLBK_ANTIAFFINITY_NS[@]}" ]]; then
       # construct pod anti affinity
       POD_ANTIAFFINITY_SPEC="    spec:
       affinity:

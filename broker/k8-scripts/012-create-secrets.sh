@@ -24,7 +24,7 @@ else
 fi
 
 if [[ -n "${SOLBK_SVR_SECRET}" ]]; then
-  ${KUBE} create secret tls ${SOLBK_SVR_SECRET} -n ${SOLBK_NS} --cert=${SOLBK_TLS_CERT} --key=${SOLBK_TLS_CERTKEY}
+  ${KUBE} create secret tls ${SOLBK_SVR_SECRET} -n ${SOLBK_NS} --cert <(cat ${SOLBK_TLS_CERT} ${SOLBK_TLS_CERTCAS[@]}) --key=${SOLBK_TLS_CERTKEY}
   if [[ $? -eq 0 ]]; then
     echo "Solace TLS Certificate Secret '${SOLBK_SVR_SECRET}' created successfully."
   else
