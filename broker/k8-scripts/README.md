@@ -79,7 +79,7 @@ Scripts are prefixed with a 3-digit number system:
 | `SOLBK_SCALING_MAXCONN`| 100 | No | Solace Event Broker Scaling Tier Parameter - Max Client Connections. |
 | `SOLBK_SCALING_MAXPOOL` | 10000 | No | Solace Event Broker Scaling Tier Parameter - Max Spool Size (in MB). |
 | `SOLBK_SCALING_MAXQMSG` | 100 | No | Solace Event Broker Scaling Tier Parameter - Max Number of Queued Messages (in millions). |
-| `SOLBK_MSGNODE_CPU` | "2" | No | Number of CPUs for Solace Broker messaging nodes. Specified value must be inside "". <br> Please refer to the Broker Resource Calculator for numbers. |
+| `SOLBK_MSGNODE_CPU` | 2 | No | Number of CPUs for Solace Broker messaging nodes. <br> Please refer to the Broker Resource Calculator for numbers. |
 | `SOLBK_MSGNODE_MEM` | 3410Mi | No | Amount of memory assigned for Solace Broker message node. Units are "Mi" "Gi". <br> Please refer to the Broker Resource Calculator for numbers. |
 | `SOLBK_ADM_PASS` | adm1nPA@55w0rD | Yes | Admin password for SEMP. |
 | `SOLBK_ADM_SECRET` | solace-admin-secret | Yes | Name of secret to store admin password for SEMP. |
