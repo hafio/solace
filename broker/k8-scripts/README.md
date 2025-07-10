@@ -81,6 +81,9 @@ Scripts are prefixed with a 3-digit number system:
 | `SOLBK_SCALING_MAXQMSG` | 100 | No | Solace Event Broker Scaling Tier Parameter - Max Number of Queued Messages (in millions). |
 | `SOLBK_MSGNODE_CPU` | 2 | No | Number of CPUs for Solace Broker messaging nodes. <br> Please refer to the Broker Resource Calculator for numbers. |
 | `SOLBK_MSGNODE_MEM` | 3410Mi | No | Amount of memory assigned for Solace Broker message node. Units are "Mi" "Gi". <br> Please refer to the Broker Resource Calculator for numbers. |
+| `SOLBK_STORAGECLASS` | (none) | No | Specify the storage class to use if required. |
+| `SOLBK_STORAGE_MSGNODE` | (none) | Yes | Specify the disk storage size for messaging nodes. |
+| `SOLBK_STORAGE_MONNODE` | 5Gi | No | Specify the disk storage size for the monitor node. |
 | `SOLBK_ADM_PASS` | adm1nPA@55w0rD | Yes | Admin password for SEMP. |
 | `SOLBK_ADM_SECRET` | solace-admin-secret | Yes | Name of secret to store admin password for SEMP. |
 | `SOLBK_SVR_SECRET` | (none) | No | Name of secret to store SSL/TLS Server Certificates. Leave blank if you do not want to enable SSL/TLS for the broker. |
