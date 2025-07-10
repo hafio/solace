@@ -34,7 +34,7 @@ else
 fi' > .tmp
 chmod +x .tmp
 
-${KUBE} cp -n ${sol_ns} .tmp ${sol_broker_name}-pubsubplus-${node}-0:/usr/sw/jail/test-semp.sh
+  ${KUBE} cp -n ${SOLBK_NS} .tmp ${SOLBK_NAME}-pubsubplus-${node}-0:/usr/sw/jail/test-semp.sh
 if [[ $? -eq 0 ]]; then
 	${KUBE} exec -n ${SOLBK_NS} ${SOLBK_NAME}-pubsubplus-${node}-0 -- /usr/sw/jail/test-semp.sh | tee .semp.out
 	if [[ `grep failed .semp.out | wc -l` -gt 0 ]]; then

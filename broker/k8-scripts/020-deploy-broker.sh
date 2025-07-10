@@ -31,15 +31,15 @@ spec:
     - name: ${IMAGEREPO_SECRET}"
     
   echo "  adminCredentialsSecret: ${SOLBK_ADM_SECRET:-adminpassword123}
-  redundancy: ${SOLBK_REDUNDANCY:-false}"
+  redundancy: ${SOLBK_REDUNDANCY}"
 
   echo "  podDisruptionBudgetForHA: true
   systemScaling:
-    maxConnections: ${SOLBK_SCALING_MAXCONN:-100}
-    maxQueueMessages: ${SOLBK_SCALING_MAXQMSG:-100}
-    maxSpoolUsage: ${SOLBK_SCALING_MAXPOOL:-10000}
-    messagingNodeCpu: \"${SOLBK_MSGNODE_CPU:-2}\"
-    messagingNodeMemory: ${SOLBK_MSGNODE_MEM:-3410Mi}
+    maxConnections: ${SOLBK_SCALING_MAXCONN}
+    maxQueueMessages: ${SOLBK_SCALING_MAXQMSG}
+    maxSpoolUsage: ${SOLBK_SCALING_MAXPOOL}
+    messagingNodeCpu: \"${SOLBK_MSGNODE_CPU}\"
+    messagingNodeMemory: ${SOLBK_MSGNODE_MEM}
   storage:"
   [[ -n "${SOLBK_STORAGECLASS}" ]] && echo "    useStorageClass: ${SOLBK_STORAGECLASS}"
   echo "    messagingNodeStorageSize: ${SOLBK_STORAGE_MSGNODE}
@@ -71,10 +71,12 @@ spec:
       echo "  nodeAssignment:"
       echo "  - name: Primary"
       echo -e "${POD_ANTIAFFINITY_SPEC}"
-      echo "  - name: Backup"
-      echo -e "${POD_ANTIAFFINITY_SPEC}"
-      echo "  - name: Monitor"
-      echo -e "${POD_ANTIAFFINITY_SPEC}"
+      if [[ "${SOLBK_REDUNDANCY}" == "true" ]]; then
+        echo "  - name: Backup"
+        echo -e "${POD_ANTIAFFINITY_SPEC}"
+        echo "  - name: Monitor"
+        echo -e "${POD_ANTIAFFINITY_SPEC}"
+      fi
     fi
       
     echo "  service:
