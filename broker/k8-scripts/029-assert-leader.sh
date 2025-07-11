@@ -12,6 +12,7 @@ if [[ "${SOLBK_REDUNDANCY}" == "true" ]]; then
 
   # revert activity cli
   echo 'home
+no paging
 enable
 admin
 redundancy revert-activity' > .tmp
@@ -26,10 +27,11 @@ redundancy revert-activity' > .tmp
 
   # create assert leader redundancy cli and copy
   echo 'home
+no paging
 enable
 admin
 config-sync assert-leader router
-config-sync assert-leader message-vpn default
+config-sync assert-leader message-vpn *
 show config-sync database
 ' > .tmp
   ${KUBE} cp -n ${SOLBK_NS} .tmp ${SOLBK_NAME}-pubsubplus-p-0:/usr/sw/jail/cliscripts/.assert-leader.cli
