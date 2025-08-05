@@ -1,0 +1,7 @@
+#!/bin/bash
+
+curl -ik https://localhost:9443/test123 \
+-u default:default \
+-H "Solace-Reply-Wait-Time-In-ms: 1000" \
+-H "Hamlyn: Yew"
+#-d '{ "key": "value" }'

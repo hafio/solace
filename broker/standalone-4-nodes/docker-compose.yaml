@@ -1,0 +1,180 @@
+x-environment:
+  &def-env
+  username_admin_globalaccesslevel: admin
+  username_admin_password: admin
+  system_scaling_maxconnectioncount: 1000
+  messagespool_maxspoolusage: 10000
+  tls_servercertificate_filepath: /run/secrets/tls.crt
+  webmanager_redirecthttp_enable: yes
+
+x-common:
+  &def-comm
+  image: solace-pubsub-enterprise:10.11.1.147
+  shm_size: 1g
+  ulimits:
+    core: 2
+    nofile:
+      soft: 6280
+      hard: 1048576
+  deploy:
+    restart_policy:
+      condition: on-failure
+      max_attempts: 1
+
+name: proj-sol-cluster
+services:
+  broker-01:
+    hostname: xps-ps-01
+    container_name: xps-ps-01
+    << : *def-comm
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #Web transport
+      - '61008:8008'
+      #Web transport over TLS
+      - '61443:1443'
+      #SEMP over TLS
+      - '61943:1943'
+      #AMQP Default VPN over TLS
+      - '61671:5671'
+      #AMQP Default VPN
+      - '61672:5672'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '61080:8080'
+      - '61900:9000'
+      - '61944:9443'
+      #SMF
+      - '61554:55555'
+      # SMF over TLS
+      - '61543:55443'
+      #SSH connection to CLI
+      - '61222:2222'
+    volumes:
+      - stor-01:/var/lib/solace
+      - ./scripts:/run/scripts
+      - ./tls.crt:/run/secrets/tls.crt
+    environment:
+      routername: xps-ps-01
+      << : *def-env
+      webmanager_redirecthttp_overridetlsport: 61943
+  broker-02:
+    hostname: xps-ps-02
+    container_name: xps-ps-02
+    << : *def-comm
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #Web transport
+      - '62008:8008'
+      #Web transport over TLS
+      - '62443:1443'
+      #SEMP over TLS
+      - '62943:1943'
+      #AMQP Default VPN over TLS
+      - '62671:5671'
+      #AMQP Default VPN
+      - '62672:5672'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '62080:8080'
+      - '62900:9000'
+      - '62944:9443'
+      #SMF
+      - '62554:55555'
+      # SMF over TLS
+      - '62543:55443'
+      #SSH connection to CLI
+      - '62222:2222'
+    volumes:
+      - stor-02:/var/lib/solace
+      - ./scripts:/run/scripts
+      - ./tls.crt:/run/secrets/tls.crt
+    environment:
+      routername: xps-ps-02
+      << : *def-env
+      webmanager_redirecthttp_overridetlsport: 62943
+  broker-03:
+    hostname: xps-ps-03
+    container_name: xps-ps-03
+    << : *def-comm
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #Web transport
+      - '63008:8008'
+      #Web transport over TLS
+      - '63443:1443'
+      #SEMP over TLS
+      - '63943:1943'
+      #AMQP Default VPN over TLS
+      - '63671:5671'
+      #AMQP Default VPN
+      - '63672:5672'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '63080:8080'
+      - '63900:9000'
+      - '63944:9443'
+      #SMF
+      - '63554:55555'
+      # SMF over TLS
+      - '63543:55443'
+      #SSH connection to CLI
+      - '63222:2222'
+    volumes:
+      - stor-03:/var/lib/solace
+      - ./scripts:/run/scripts
+      - ./tls.crt:/run/secrets/tls.crt
+    environment:
+      routername: xps-ps-03
+      << : *def-env
+      webmanager_redirecthttp_overridetlsport: 63943
+  broker-04:
+    hostname: xps-ps-04
+    container_name: xps-ps-04
+    << : *def-comm
+    ports:
+    #Port Mappings:  With the exception of SMF, ports are mapped straight
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #Web transport
+      - '64008:8008'
+      #Web transport over TLS
+      - '64443:1443'
+      #SEMP over TLS
+      - '64943:1943'
+      #AMQP Default VPN over TLS
+      - '64671:5671'
+      #AMQP Default VPN
+      - '64672:5672'
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '64080:8080'
+      - '64900:9000'
+      - '64944:9443'
+      #SMF
+      - '64554:55555'
+      # SMF over TLS
+      - '64543:55443'
+      #SSH connection to CLI
+      - '64222:2222'
+    volumes:
+      - stor-04:/var/lib/solace
+      - ./scripts:/run/scripts
+      - ./tls.crt:/run/secrets/tls.crt
+    environment:
+      routername: xps-ps-04
+      << : *def-env
+      webmanager_redirecthttp_overridetlsport: 64943
+
+volumes:
+  stor-01:
+  stor-02:
+  stor-03:
+  stor-04:
+  

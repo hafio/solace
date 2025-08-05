@@ -1,0 +1,6 @@
+#!/bin/bash
+
+curl -ik -X POST https://localhost:61943/TOPIC/thisis-topic \
+-u default:default \
+-H "Solace-Reply-Wait-Time-In-ms: 1000" 
+#-d '{ "key": "value" }'
