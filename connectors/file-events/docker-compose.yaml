@@ -1,0 +1,14 @@
+name: proj-sol-file-events
+services:
+  file-event-mi:
+    image: solace/solace-pubsub-connector-file-events:3.0.0
+    hostname: fe-mi-01
+    container_name: fe-mi-01
+    ports:
+    - 8090:8090
+    volumes:
+    - ./config/application-source.yml:/app/external/spring/config/application.yml
+    - ./config/dir.cfg:/app/external/spring/config/dir.cfg
+    - ./input:/files/input
+    environment:
+    - SOLACE_JAVA_HOST=host.docker.internal:61554

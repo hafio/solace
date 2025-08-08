@@ -1,0 +1,191 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: File Events Connector(Source)
+  cloud:
+    stream:        
+      bindings:
+        input-0:
+          destination: /app/external/spring/config/dir.cfg
+          binder: file-events
+        output-0:
+          destination: fe/source/test
+          binder: solace
+file-events:
+  source:
+    scheduler:
+      restart_time_sec: 10
+    general:
+      miID: SRC_FILE_EVENTS_S1
+      file_type: 4
+      state_backup_path: backup_state.txt
+    data_events:
+      connectorStartEvent: false
+      connectorCompleteEvent: false
+      fileStartEvent: false
+      fileCompleteEvent: false
+    advanced:
+      fileFormat: 1
+      #dynamicTopic: "solace/dynamic/topic/${column1}/${column5}/${city}"  
+      #jsonPath: "$.Authors[*].Books[*]"  # Use with fileFormat 3 (JSON File Streaming)
+      #xPath: "/class/student"  # Use with fileFormat 4 (XML File Streaming)
+      delimited:  # Used with fileFormat 1 (Line by line), 2 (Delimited File Streaming), 11 (Line By Line V2), 12 (Delimited V2)
+        #eventDelimiter: '\n' 
+        columnDelimiter: "|"
+        #columnHeaderMap: Index,Customer Id,First Name,Last Name,Age,Company,City,Country,Phone 1,Phone 2,Email,Subscription Date,Website
+        ignoreFirstEventOfDelimitedFile: false
+        useFirstEventAsHeader: true
+        trimColumns: true 
+        quoteCharacter: '"' 
+        #eventFilterExpression: "Age < 31" 
+        #eventFilterExpression: "Age < 30 && Country == 'Antigua_and_Barbuda'" 
+        #columnFilter: "First Name,Company" 
+        #strictValidation: true		#Used with version V2
+        #restrictToColumnSpecs: false	#Used with version V2
+        #columnSpecs:	#Used with version V2
+        #  - name: "First Name"
+        #    type: STRING
+        #    regex: "[A-Za-z]+"
+        #    onRegexFail: SKIP_COLUMN  #THROW, SKIP_COLUMN, SKIP_ROW, LOG, DEFAULT_VALUE, COERCE
+        #    defaultValue: "Unknown"
+        #    required: OPTIONAL          #REQUIRED, OPTIONAL, DROP
+        #  - name: "Customer Id"
+        #    type: STRING
+        #    required: REQUIRED          #REQUIRED, OPTIONAL, DROP
+        #  - name: Age
+        #    type: INT
+        #    regex: "\\d+"
+        #    onRegexFail: COERCE
+        #    required: REQUIRED
+      #fixedLengthFile:
+        #rowSeparatorPresent: true
+        #rowSeparator: "|zz|"  #If not configured, default new line is used if rowSeparatorPresent is set to true
+        #fixedRowSize: 51
+        #strictValidation: false
+        #eventFilterExpression: "Age >25" 
+        #columnSpecs:
+        #  - "Name, 10, STRING"
+        #  - "Age, 3, INT"
+        #  - "Balance, 10, DOUBLE"
+        #  - "Active, 5, BOOLEAN"
+        #  - "Birthday, 10, DATE, dd/MM/yyyy, dd-MM-yyyy"
+        #columnSpecs:
+        #  - "Name, 10, STRING"
+        #  - "Age, 3, INT"
+        #  - "Balance, 10, DOUBLE"
+        #  - "Active, 5, BOOLEAN"
+        #  - "Birthday, 10, DATE, dd/MM/yyyy, dd-MM-yyyy"
+      output:
+        outputFormat: "json"   #Values allowed - csv,json,xml,text,raw
+        prettyPrintJson: true
+        #ignoreNulls: false
+        #csvDelimiter: ","
+        #csvQuoteChar: "\""
+        #csvQuoteMode: MINIMAL
+        #csvRecordSeparator: "";
+        #xmlRootElement: "customer"
+        #prettyPrintXml: true
+        #includeXmlDeclaration: false
+        #xmlVersion: "1.0"
+        #xmlEncoding: "UTF-8"
+        #xmlStandalone: "no"
+        #xmlMethod: "xml"
+        #textValuesOnly: false
+        #textValueSeparator: ": "
+        #textLineSeparator: "\n"
+        #fieldOrder:
+          #- "List" # List elements for field order (e.g., "field1", "field2")
+        #strictFieldOrder: true
+    #directory_wildcard:
+      #wildcard_type: 0
+      #config_path: #/home/centos/pubsubplus-connector-file-events-2.0.0/configs/dir_regexps.cfg
+    directory_replication:
+      start_time: -1
+    solace_out:
+      lvq: femi.lvq
+      destination: solace/connector/file/events/source/test
+    #file_mesh_manager:
+      #enabled: false
+      #useOutputDestinationSolaceCredentials: true
+      #heartbeat_enabled: false
+      #heartbeat_interval: 5
+      #solace_base_publish_topic_heartbeat: manager/dd/STORE-MANGEMENT/fc-source/cc/se/fc/source/Stockholm
+      #solace_base_publish_topic: manager/dd/STORE-MANGEMENT/fc-source/cc/se/fc/source/Stockholm
+      #solace_messaging_mode: PERSISTENT
+      #events:
+        #fileStart: true
+        #fileComplete: true
+solace:
+  connector:
+    security:
+      enabled: false
+    error:
+      handle: stop_all
+    workflows:
+      0:
+        enabled: true
+        acknowledgment:
+          publish-async: true
+    management:
+      leader-election:
+        mode: standalone  # The connector’s leader election mode. (values: standalone, active_active, active_standby)
+        fail-over:
+          max-attempts: 3  # The maximum number of attempts to perform a fail-over.
+          back-off-initial-interval: 1000  # The initial interval (milliseconds) to back-off when retrying a fail-over.
+          back-off-max-interval: 10000  # The maximum interval (milliseconds) to back-off when retrying a fail-over.
+          back-off-multiplier: 2.0  # The multiplier to apply to the back-off interval between each retry of a fail-over.
+      #queue: management-queue-file-source  # The management queue name.
+      #session: # The management session. This has the same interface as that used by `solace.java.*`. For more info: https://github.com/SolaceProducts/solace-spring-boot/tree/master/solace-spring-boot-starters/solace-java-spring-boot-starter#updating-your-application-properties
+        host: tcp://host.docker.internal:61554
+        msg-vpn: default
+        client-username: default
+        client-password: default
+  java:
+    host: tcp://host.docker.internal:61554
+    msg-vpn: default
+    client-username: default
+    client-password: default
+    connectRetries: -1
+    reconnectRetries: -1
+logging:  # Logging configuration. For more info: https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.logging
+  level:
+    root: INFO
+    com.solace.connector.jms: INFO # Enables TRACE logs for connector
+    com.solace.connector.core: INFO # Enables TRACE logs for connector framework
+    com.solace.spring.cloud.stream.binder: INFO # Enables TRACE logs for Solace and JMS binders
+    com.solacecoe.spring.cloud.stream.binders.file_events: TRACE # Enables TRACE logs for Solace and JMS binders
+  file:
+    name: myapp.log  # base log file name
+  logback:
+    rollingpolicy:  # Logback file rolling policy
+      file-name-pattern: "${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz"  # Pattern for rolled-over log file names. Example: Rolls the log file into an archive once every day. `%i` is reset to `0` at the start of the day.
+      max-file-size: 100MB  # The maximum size of log file before it is archived. Example: Within a given day, when the log file reaches 100 MB, archive it, and increment `%i`.
+      max-history: 7  # The maximum rotation-period's worth of archive log files to keep. Example: Since the `file-name-pattern` is configured to rollover once every day, keep 7 days worth of log archives.
+      total-size-cap: 1GB  # Total size of log backups for a given rotation period. Example: Keep up-to 1 GB of log archives for every day.
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,loggers,logfile,channels,env,workflows,leaderelection,bindings"
+  simple:
+    metrics:
+      export:
+        enabled: true
+  endpoint:
+    logfile:
+      external-file: myapp.log
+    prometheus:
+      enabled: false
+    health:
+      show-details: ALWAYS
+      status:
+        # Change default order so that RECONNECTING takes precedence over UP and UNKNOWN
+        order:
+          - DOWN
+          - OUT_OF_SERVICE
+          - RECONNECTING
+          - UP
+          - UNKNOWN

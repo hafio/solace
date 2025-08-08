@@ -1,0 +1,43 @@
+file-events:
+  source:
+    advanced:
+      fixedLengthFile:
+        #columnSpecs:
+        #  - "Name, 10, STRING"
+        #  - "Age, 3, INT"
+        #  - "Balance, 10, DOUBLE"
+        #  - "Active, 5, BOOLEAN"
+        #  - "Birthday, 10, DATE, dd/MM/yyyy, dd-MM-yyyy"
+        columnSpecs:
+          - name: Name
+            length: 10
+            type: STRING
+            regex: "[A-Za-z]+"
+            onRegexFail: DEFAULT_VALUE  #THROW, SKIP_COLUMN, SKIP_ROW, LOG, DEFAULT_VALUE, COERCE
+            defaultValue: "Unknown"
+            required: REQUIRED          #REQUIRED, OPTIONAL, DROP
+          - name: Age
+            length: 3
+            type: INT
+            regex: "\\d+"
+            onRegexFail: COERCE
+            required: OPTIONAL
+          - name: Balance
+            length: 10
+            type: DOUBLE
+            regex: "[0-9]*\\.?[0-9]*(?:[eE][-+]?[0-9]+)?"
+            onRegexFail: SKIP_COLUMN
+            required: OPTIONAL
+          - name: Active
+            length: 5
+            type: BOOLEAN
+            regex: "(true|false)"
+            onRegexFail: DEFAULT_VALUE  #THROW, SKIP_COLUMN, SKIP_ROW, LOG, DEFAULT_VALUE, COERCE
+            defaultValue: false
+            required: OPTIONAL
+          - name: Birthday
+            length: 10
+            type: DATE
+            inputDateFormat: "dd/MM/yyyy"
+            outputDateFormat: "dd-MM-yyyy"
+            required: OPTIONAL
