@@ -27,3 +27,12 @@ The connector is configured:
 | Trim Columns | `true` |
 | Output | JSON |
 | Pretty Print Json | `true` |
+
+# Setup
+
+Use `docker-compose.yaml` to spin up the container.
+Required files:
+- `./config/application-source.yml` : used to configure the connector
+- `./config/dir.cfg` : used to specify the source directories and input file patterns
+
+`./input` is mapped to `/files/input` inside the container and the connector watches `/files/input` directory for file changes.
