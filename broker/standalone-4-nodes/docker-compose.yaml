@@ -9,7 +9,7 @@ x-environment:
 
 x-common:
   &def-comm
-  image: solace-pubsub-enterprise:10.11.1.147
+  image: solace-pubsub-enterprise:10.25.0.61
   shm_size: 1g
   ulimits:
     core: 2

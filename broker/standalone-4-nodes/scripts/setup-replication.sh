@@ -2,7 +2,7 @@
 
 CLI_FILENAME="default-vpn-spool.cli"
 CLI_DIRNAME="/usr/sw/jail/cliscripts"
-
+RPSK="D5jYITnFCpxfF2cTsDmAFvVBkkyKhpWBzFb7iOCdgJhQknl3+2x8J6gXPodyJOdLDdBDhBhbQBpMm0Okd6agFoFWpKlzhNr6ENZMB12zLKmq4ej0MYoZKEFJDd85bbhSu/uiSQibxYxyM6TvzV3JzNAwPqEq5Og/c2DIHIWZuMISf6+iQ2LvpzGqOyyofqKTQKE7tYHkWnGsVwSzhTo9vpx8vMCbbefb80nxFThSGrlLqjUnQRsDU+NqWJB2/WR9aoYWh1IyXJR29VzO+0YAfbS5ywSv2sOryZIyy9tiAN98ZuUwbnSxJHsiFOtzI6plFsWgG5hlXN04t8Bth25xbQ=="
 
 declare -A brk_host=(
 	[xps-ps-01]="xps-ps-02"
@@ -21,7 +21,6 @@ declare -A ldr_vpn_state=(
 	[xps-ps-02]="vpn-01"
 )
 
-
 if [[ "${HOSTNAME}" == "xps-ps-01" ]] || [[ "${HOSTNAME}" == "xps-ps-02" ]]; then
 echo "
 home
@@ -29,12 +28,14 @@ enable
 configure
 replication mate virtual-router-name v:${brk_host[${HOSTNAME}]}
 replication mate connect-via ${brk_host[${HOSTNAME}]}.proj-sol-cluster_default:55443 ssl
-replication config-sync bridge authentication auth-scheme basic
+!replication config-sync bridge authentication auth-scheme basic
+replication config-sync bridge authentication pre-shared-key key ${RPSK}
+no replication config-sync bridge authentication insecure-upgrade-mode
 no replication config-sync bridge compressed-data
 replication config-sync bridge ssl
-replication config-sync bridge ssl-server-certificate-validation validate-server-name
-replication config-sync bridge ssl-server-certificate-validation max-certificate-chain-depth 3
-replication config-sync bridge ssl-server-certificate-validation validate-certificate-date
+!replication config-sync bridge ssl-server-certificate-validation validate-server-name
+!replication config-sync bridge ssl-server-certificate-validation max-certificate-chain-depth 3
+!replication config-sync bridge ssl-server-certificate-validation validate-certificate-date
 no replication config-sync bridge shutdown
 
 home
