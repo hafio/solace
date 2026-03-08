@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solace-ibmmq-connector-library-pvc
+  namespace: solace-ibmmq-connector-ns
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: <Storage Class Name>
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lib-downloader-script
+  namespace: solace-ibmmq-connector-ns
+data:
+  download.sh: |-
+    #!/bin/bash
+    # Target directory for JARs (matches your volume mount path)
+    LIB_DIR="/app/external/libs"
+    # Create directory if it doesn't exist
+    mkdir -p "$LIB_DIR"
+    # Array of JAR download URLs from Maven Central
+    # Note: Use repo1.maven.org for direct file access
+    JAR_URLS=(
+        "https://repo1.maven.org/maven2/com/ibm/mq/com.ibm.mq.allclient/9.3.4.0/com.ibm.mq.allclient-9.3.4.0.jar"
+        "https://repo1.maven.org/maven2/javax/jms/javax.jms-api/2.0.1/javax.jms-api-2.0.1.jar"
+        "https://repo1.maven.org/maven2/org/json/json/20231013/json-20231013.jar"
+    )
+    echo "Starting library synchronization to $LIB_DIR..."
+    for url in "${JAR_URLS[@]}"; do
+        # Extract filename from URL
+        file_name=$(basename "$url")
+        
+        # Check if file already exists to avoid redundant downloads
+        if [ -f "$LIB_DIR/$file_name" ]; then
+            echo "[SKIP] $file_name already exists."
+        else
+            echo "[DOWNLOAD] Fetching $file_name..."
+            # -q for quiet, -nc to not overwrite, -P for prefix directory
+            wget -q -nc -P "$LIB_DIR" "$url"
+            
+            if [ $? -eq 0 ]; then
+                echo "[SUCCESS] Saved $file_name"
+            else
+                echo "[ERROR] Failed to download $file_name"
+                exit 1
+            fi
+        fi
+    done
+    echo "Synchronization complete. Listing contents of $LIB_DIR:"
+    chmod -R 644 "$LIB_DIR"/*.jar
+    ls -lh "$LIB_DIR"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: solace-mq-lib-populator
+  namespace: solace-ibmmq-connector-ns
+spec:
+  template:
+    spec:
+      containers:
+      - name: downloader
+        image: bash:latest
+        command: ["/bin/bash", "/download.sh"]
+        volumeMounts:
+        - name: jar-libraries
+          mountPath: /app/external/libs
+        - name: download-script
+          mountPath: /download.sh
+          subPath: download.sh
+          readOnly: true
+      restartPolicy: OnFailure
+      volumes:
+      - name: jar-libraries
+        persistentVolumeClaim:
+          claimName: solace-ibmmq-connector-library-pvc
+      - name: download-script
+        configMap:
+          name: lib-downloader-script
+          defaultMode: 0755

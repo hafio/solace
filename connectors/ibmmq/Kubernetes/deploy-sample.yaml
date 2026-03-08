@@ -1,0 +1,219 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: solace-ibmmq-connector-ns
+---
+# Secret included it here for easier reference but it should not be part of the overall deployment YAML.
+apiVersion: v1
+data:
+  .dockerconfigjson: <DATA>
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: repo-secret
+  namespace: solace-ibmmq-connector-ns
+---
+# Secret included it here for easier reference but it should not be part of the overall deployment YAML.
+apiVersion: v1
+data:
+  keystore.jks: <DATA>
+kind: Secret
+metadata:
+  name: keystore-secret
+  namespace: solace-ibmmq-connector-ns
+type: Opaque
+---
+# Secret included it here for easier reference but it should not be part of the overall deployment YAML.
+apiVersion: v1
+data:
+  truststore.jks: <DATA>
+kind: Secret
+metadata:
+  name: truststore-secret
+  namespace: solace-ibmmq-connector-ns
+type: Opaque
+---
+# Secret included it here for easier reference but it should not be part of the overall deployment YAML.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: connector-secret
+  namespace: solace-ibmmq-connector-ns
+type: Opaque
+stringData:
+  SECRET_TRUSTSTORE_PASSWORD: "abcd1234"
+  SECRET_MQ_USERNAME: mqmadm
+  SECRET_MQ_PASSWORD: mqmadm
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connector-config
+  namespace: solace-ibmmq-connector-ns
+data:
+  application.yml: |-
+    spring:
+      application:
+        name: Solace-IBMMQ-Connector-0
+      cloud:
+        stream:
+          binders:
+            # 1st solace binder in this example
+            solace-connection-0:
+              type: solace
+              environment:
+                solace:
+                  java:
+                    host: tcps://<HOST/IP>:<PORT>
+                    msg-vpn: default
+                    client-username: default
+                    client-password: default
+                    api-properties:
+                      SSL_TRUST_STORE: /app/external/classpath/truststores/truststore.jks
+                      SSL_TRUST_STORE_FORMAT: jks
+                      SSL_TRUST_STORE_PASSWORD: ${SECRET_TRUSTSTORE_PASSWORD}
+                      SSL_VALIDATE_CERTIFICATE: true
+            ibmmq-connection-0:
+              type: jms
+              environment:
+                ibm:
+                  mq:
+                    channel: SYSTEM.DEF.SVRCONN
+                    user: ${SECRET_MQ_USERNAME}
+                    password: ${SECRET_MQ_PASSWORD}
+                    queue-manager: QUEUE.MANAGER.NAME
+                    conn-name: <HOST/IP>(<PORT>)
+            # Required for internal use
+            undefined:
+              type: undefined
+          bindings:
+            input-0: # MQ Queue > Solace Topic
+              destination: MQ.QUEUE.0
+              binder: ibmmq-connection-0
+            output-0:
+              destination: solace/topic/0
+              binder: solace-connection-0
+              
+            input-1: # Solace Queue > MQ Topic
+              destination: solace-queue-0
+              binder: solace-connection-0
+            output-1:
+              destination: MQ.TOPIC.0
+              binder: ibmmq-connection-0
+              
+            input-2: # Solace Queue > MQ Topic
+              destination: solace-queue-1
+              binder: solace-connection-0
+            output-2:
+              destination: MQ.QUEUE.1
+              binder: ibmmq-connection-0
+          jms:
+            default:
+              consumer:
+                destination-type: queue
+              producer:
+                destination-type: topic
+            bindings:
+              output-2:
+                producer:
+                  destination-type: queue
+    solace:
+      connector:
+        workflows:
+          0:
+            enabled: true
+          1:
+            enabled: false
+          2:
+            enabled: true
+            
+    logging:
+      level:
+        root: INFO
+        com.solace.connector.jms: INFO
+        com.solace.connector.core: INFO
+        com.solace.spring.cloud.stream.binder: INFO
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solace-connector-tps-1
+  namespace: solace-ibmmq-connector-ns
+  labels:
+    solace: ibmmq-connector
+spec:
+  selector:
+    matchLabels:
+      solace: ibmmq-connector
+  template:
+    metadata:
+      labels:
+        solace: ibmmq-connector
+    spec:
+      imagePullSecrets:
+      - name: repo-secret
+      containers:
+      - name: solace-connector
+        image: ocpinfradockervirtual.br.psa/solace-pubsub-ibmmq-connector:2.10.2
+        #env:
+        #  key: value
+        envFrom:
+        - secretRef:
+          name: connector-secret
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+        volumeMounts:
+        - name: app-config
+          mountPath: /app/external/spring/config/application.yml
+          subPath: application.yml
+          readOnly: true
+        - name: trust-store
+          mountPath: /app/external/classpath/truststores/truststore.jks
+          subPath: truststore.jks
+          readOnly: true
+        - name: key-store
+          mountPath: /app/external/classpath/truststores/keystore.jks
+          subPath: keystore.jks
+          readOnly: true
+        - name: jar-libraries
+          mountPath: /app/external/libs
+          readOnly: true
+      volumes:
+      - name: app-config
+        configMap:
+          name: connector-config
+      - name: trust-store
+        secret:
+          secretName: truststore-secret
+          items:
+          - key: truststore.jks
+            path: truststore.jks
+      - name: key-store
+        secret:
+          secretName: keystore-secret
+          items:
+          - key: keystore.jks
+            path: keystore.jks
+      - name: jar-libraries
+        persistentVolumeClaim:
+          claimName: solace-ibmmq-connector-library-pvc
+---
+# Optional: if connector manager is also deployed
+apiVersion: v1
+kind: Service
+metadata:
+  name: solace-connector-tps-1-service
+  namespace: solace-ibmmq-connector-ns
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 10.115.97.130
+spec:
+  selector:
+    solace: ibmmq-connector
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 9500
+    targetPort: 9500
