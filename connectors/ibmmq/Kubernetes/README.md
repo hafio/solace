@@ -20,8 +20,8 @@ As the required jar libraries are not distributed inside the container image, th
 ## Steps:
 
 > [!NOTE]
-> Full deployment yaml for Method 1: [lib-downloader.yaml](lib-downloader.yaml)
-> Full deployment yaml for Method 2: [lib-copy-helper.yaml](lib-copy-helper.yaml)
+> Full deployment yaml for Method 1: [lib-downloader.yaml](lib-downloader.yaml) <br>
+> Full deployment yaml for Method 2: [lib-copy-helper.yaml](lib-copy-helper.yaml) 
 
 ### 1. Create PVC
 
