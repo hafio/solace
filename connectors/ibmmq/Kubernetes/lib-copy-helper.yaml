@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solace-ibmmq-connector-library-pvc
+  namespace: solace-ibmmq-connector-ns
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: <Storage Class Name>
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: solace-mq-lib-helper
+  namespace: solace-ibmmq-connector-ns
+spec:
+  template:
+    spec:
+      containers:
+      - name: helper
+        image: busybox:latest
+        command: ["/bin/sh", "-c", "sleep 3600"]
+        volumeMounts:
+        - name: jar-libraries
+          mountPath: /app/external/libs
+      volumes:
+      - name: jar-libraries
+        persistentVolumeClaim:
+          claimName: solace-ibmmq-connector-library-pvc
