@@ -1,9 +1,20 @@
-# docker-compose -f PubSubStandard_singleNode.yml up
-name: project-solace-pubsubplus
 services:
-  primary:
-    container_name: pubSubEntSingleNode
-    image: solace-pubsub-enterprise:10.25.18.5514
+  oa2:
+    image: 'jboss/keycloak:16.1.1'
+    ports:
+    - '7778:8443'
+    - '7777:8080'
+    volumes:
+    - '/mnt/c/Solace/docker/Keycloak/data:/opt/jboss/keycloak/standalone/data'
+    - '/mnt/c/Solace/docker/keycloak/cert:/etc/x509/https'
+    environment:
+    - DB_VENDOR=H2
+    - KEYCLOAK_PASSWORD=admin
+    - KEYCLOAK_USER=admin
+    container_name: oauth2-server
+  broker:
+    container_name: solace-broker
+    image: solace-pubsub-enterprise:10.25.0.111
     volumes:
       - "storage-group:/var/lib/solace"
       - "./tls-comb.crt:/secret/server.crt" 
@@ -11,8 +22,8 @@ services:
     ulimits:
       core: -1
       nofile: # get values from resource calculator
-        soft: 1024
-        hard: 1048576
+        soft: 6280
+        hard: 42192
     deploy:
       restart_policy:
         condition: on-failure
@@ -22,37 +33,37 @@ services:
     #through from host to container.  This may result in port collisions on
     #commonly used ports that will cause failure of the container to start.
       #Web transport
-      - '58008:8008'
+      #- '58008:8008'
       #Web transport over TLS
-      - '51443:1443'
+      #- '51443:1443'
       #SEMP over TLS
       - '51943:1943'
       #MQTT Default VPN
-      - '51883:1883'
+      #- '51883:1883'
       #AMQP Default VPN over TLS
-      - '55671:5671'
+      #- '55671:5671'
       #AMQP Default VPN
-      - '55672:5672'
+      #- '55672:5672'
       #MQTT Default VPN over WebSockets
-      - '58000:8000'
+      #- '58000:8000'
       #MQTT Default VPN over WebSockets / TLS
-      - '58443:8443'
+      #- '58443:8443'
       #MQTT Default VPN over TLS
-      - '58883:8883'
+      #- '58883:8883'
       #SEMP / PubSub+ Manager
       #REST Default VPN
-      - '58080:8080'
-      - '59000:9000'
+      #- '58080:8080'
+      #- '59000:9000'
       #REST Default VPN over TLS
-      - '59443:9443'
+      #- '59443:9443'
       #SMF
-      - '55554:55555'
+      #- '55554:55555'
       #SMF Compressed
-      - '55003:55003'
+      #- '55003:55003'
       #SMF over TLS
-      - '55443:55443'
+      #- '55443:55443'
       #SSH connection to CLI
-      - '52222:2222'
+      #- '52222:2222'
     environment:
       - username_admin_globalaccesslevel=admin
       - username_admin_password=admin

@@ -1,0 +1,31 @@
+# docker-compose -f PubSubStandard_singleNode.yml up
+name: SolaceBroker
+
+services:
+  primary:
+    container_name: SingleNode
+    image: solace-pubsub-enterprise:10.25.0.61
+    shm_size: 1g
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 1048576
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    network_mode: "host"
+    environment:
+      - username_admin_globalaccesslevel=admin
+      - username_admin_password=admin
+      - system_scaling_maxconnectioncount=10000
+      - service_smf_port=60055
+      - service_smf_tlsport=60543
+      - service_smf_compressedport=60001
+      - service_smf_routingport=60002
+      - service_semp_port=60080
+    volumes:
+      - "storage-group:/var/lib/solace"
+volumes:
+  storage-group:

@@ -4,7 +4,8 @@ name: SolaceBroker
 services:
   primary:
     container_name: SingleNode
-    image: registry.hamaster.handy:5443/solace/solace-pubsub-standard:latest
+    image: solace-pubsub-standard:10.25.0.188
+#    image: solace-pubsub-enterprise:10.8.1.209
     volumes:
       - "storage-group:/var/lib/solace"
     shm_size: 1g
@@ -12,11 +13,12 @@ services:
       core: -1
       nofile:
         soft: 2448
-        hard: 6592
+        hard: 1048576
     deploy:
       restart_policy:
         condition: on-failure
         max_attempts: 1
+    user: '0'
     ports:
     #Port Mappings:  With the exception of SMF, ports are mapped straight
     #through from host to container.  This may result in port collisions on
@@ -56,7 +58,7 @@ services:
     environment:
       - username_admin_globalaccesslevel=admin
       - username_admin_password=admin
-      - system_scaling_maxconnectioncount=100
+      - system_scaling_maxconnectioncount=1000
 
 volumes:
   storage-group:

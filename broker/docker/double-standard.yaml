@@ -1,0 +1,49 @@
+# docker-compose -f PubSubStandard_singleNode.yml up
+name: SolaceBroker
+
+x-environment: &def-env
+  username_admin_globalaccesslevel: admin
+  username_admin_password: admin
+  system_scaling_maxconnectioncount: 100
+  system_scaling_maxkafkabridgecount: 10
+  messagespool_maxspoolusage: 100
+
+x-common: &def-comm
+  image: solace/solace-pubsub-standard:latest
+  shm_size: 1g
+  ulimits:
+    core: -1
+    nofile:
+      soft: 6280
+      hard: 1048576
+  deploy:
+    restart_policy:
+      condition: no
+
+services:
+  solace1:
+    hostname: solace1
+    container_name: solace1
+    << : *def-comm
+    volumes:
+      - "storage-group1:/var/lib/solace"
+    ports:
+      - '51808:8080'
+      - '51943:1943'
+    environment:
+      << : *def-env
+  solace2:
+    hostname: solace2
+    container_name: solace2
+    << : *def-comm
+    volumes:
+      - "storage-group2:/var/lib/solace"
+    ports:
+      - '52808:8080'
+      - '52943:1943'
+    environment:
+      << : *def-env
+
+volumes:
+  storage-group1:
+  storage-group2:

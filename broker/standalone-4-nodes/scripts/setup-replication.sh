@@ -82,5 +82,3 @@ no config-sync shutdown
 fi
 
 /usr/sw/loads/currentload/bin/cli -Apes ${CLI_FILENAME}
-
-

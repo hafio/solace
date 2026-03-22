@@ -1,0 +1,29 @@
+name: SolaceBroker
+
+services:
+  solace:
+    pull_policy: always
+    container_name: DisabledDefaultVpn
+    image: solace/solace-pubsub-standard:latest
+    shm_size: 1g
+    ulimits:
+      core: -1
+      nofile:
+        soft: 2448
+        hard: 1048576
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 1
+    ports:
+    #only HTTP SEMP / REST is kept.
+    #through from host to container.  This may result in port collisions on
+    #commonly used ports that will cause failure of the container to start.
+      #SEMP / PubSub+ Manager
+      #REST Default VPN
+      - '58080:8080'
+    environment:
+      - username_admin_globalaccesslevel=admin
+      - username_admin_password=admin
+      - system_scaling_maxconnectioncount=100
+      - messagevpn_default_service_amqp_enable=no

@@ -8,6 +8,7 @@ x-environment:
   username_admin_globalaccesslevel: admin
   username_admin_password: ${ADMIN_PASSWORD:-admin}
   system_scaling_maxconnectioncount: 100
+  tls_servercertificate_filepath: /secret/server.crt
   redundancy_enable: "yes"
   redundancy_authentication_presharedkey_key: 'JM2gWU1wU9563gzDYjO3jFA9UJO9QhYVN7SAOFqfGAk='
   redundancy_group_node_primary_connectvia: primary
@@ -19,7 +20,7 @@ x-environment:
 
 x-common:
   &default-common
-  image: solace/solace-pubsub-enterprise:10.25.0.87
+  image: solace-pubsub-enterprise:10.25.0.87
   shm_size: 1g
   networks:
     - hanet
@@ -33,6 +34,7 @@ services:
       - "212:2222"
     volumes:
       - storage-group-1:/var/lib/solace
+      - ./tls-comb.crt:/secret/server.crt
     environment:
       << : *default-environment
       routername: primary
@@ -54,6 +56,7 @@ services:
       - "312:2222"
     volumes:
       - storage-group-2:/var/lib/solace
+      - ./tls-comb.crt:/secret/server.crt
     environment:
       << : *default-environment
       routername: backup
@@ -75,6 +78,7 @@ services:
       - "412:2222"
     volumes:
       - storage-group-3:/var/lib/solace
+      - ./tls-comb.crt:/secret/server.crt
     environment:
       << : *default-environment
       routername: monitoring
