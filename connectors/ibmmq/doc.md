@@ -16,15 +16,17 @@
 - [4. Spring Cloud Stream — Bindings (Workflows)](#4-spring-cloud-stream--bindings-workflows)
 - [5. JMS Binder Options](#5-jms-binder-options)
 - [6. JMS Binding-Level Options (Consumer & Producer)](#6-jms-binding-level-options-consumer--producer)
-- [7. Solace Connector — Workflow Configuration](#7-solace-connector--workflow-configuration)
-- [8. Solace Connector — Security](#8-solace-connector--security)
-- [9. Solace Connector — Management & Leader Election](#9-solace-connector--management--leader-election)
-- [10. Spring SSL Bundles](#10-spring-ssl-bundles)
-- [11. Spring Actuator / Management Endpoint](#11-spring-actuator--management-endpoint)
-- [12. Logging](#12-logging)
-- [13. JVM System Properties](#13-jvm-system-properties)
-- [14. Environment Variable Overrides](#14-environment-variable-overrides)
-- [15. Spring Profiles & Config Locations](#15-spring-profiles--config-locations)
+- [7. Solace Binding-Level Options (Consumer & Producer)](#7-solace-binding-level-options-consumer--producer)
+- [8. Solace Connector — Workflow Configuration](#8-solace-connector--workflow-configuration)
+- [9. Solace Connector — Security](#9-solace-connector--security)
+- [10. Solace Connector — Management & Leader Election](#10-solace-connector--management--leader-election)
+- [11. Spring SSL Bundles](#11-spring-ssl-bundles)
+- [12. Spring Actuator / Management Endpoint](#12-spring-actuator--management-endpoint)
+- [13. Logging](#13-logging)
+- [14. JVM System Properties](#14-jvm-system-properties)
+- [15. Environment Variable Overrides](#15-environment-variable-overrides)
+- [16. Spring Profiles & Config Locations](#16-spring-profiles--config-locations)
+- [Solace Message Headers Reference](#solace-message-headers-reference)
 
 ---
 
@@ -168,16 +170,17 @@ application.yml
 │       │       ├── ibm.mq.*                   # IBM MQ connection (Section 2)
 │       │       └── jms-binder.*               # JMS binder options (Section 5)
 │       ├── bindings.<input|output>-<N>        # Workflow data paths (Section 4)
-│       └── jms.bindings.<name>.consumer|producer  # JMS binding options (Section 6)
+│       ├── jms.bindings.<name>.consumer|producer  # JMS binding options (Section 6)
+│       └── solace.bindings.<name>.consumer|producer  # Solace binding options (Section 7)
 │
 ├── solace.connector
-│   ├── workflows.<N>.*                        # Workflow config (Section 7)
-│   ├── default.workflow.*                     # Default workflow config (Section 7)
-│   ├── security.*                             # Auth/users (Section 8)
-│   └── management.*                           # Leader election (Section 9)
+│   ├── workflows.<N>.*                        # Workflow config (Section 8)
+│   ├── default.workflow.*                     # Default workflow config (Section 8)
+│   ├── security.*                             # Auth/users (Section 9)
+│   └── management.*                           # Leader election (Section 10)
 │
-├── management.*                               # Spring Actuator (Section 11)
-└── logging.*                                  # Log levels (Section 12)
+├── management.*                               # Spring Actuator (Section 12)
+└── logging.*                                  # Log levels (Section 13)
 ```
 
 ---
@@ -356,6 +359,12 @@ spring:
 | `<name>.type` | String | `solace`, `jms`, `undefined` | Type of binder. `undefined` is required for internal use |
 | `<name>.environment.*` | Map | _(varies)_ | Binder-specific configuration. All properties from [Section 1](#1-solace-event-broker-connection) (for `solace`) or [Section 2](#2-ibm-mq-connection) (for `jms`) go here |
 
+**Solace binder-level options** (set under `spring.cloud.stream.solace.binder.*`):
+
+| Key | Type | Values | Default | Description |
+|---|---|---|---|---|
+| `session-initialization-strategy` | String | `eager` / `lazy` | `eager` | When to create the Solace session. `eager` = immediately on startup. `lazy` = on first binding activation |
+
 > [!NOTE]
 > You must always include the `undefined` binder:
 > ```yaml
@@ -503,7 +512,65 @@ spring:
 
 ---
 
-## 7. Solace Connector — Workflow Configuration
+## 7. Solace Binding-Level Options (Consumer & Producer)
+
+These properties configure the **Solace binder** side of a binding. Use them when you need the Solace binder to send to a **queue** instead of a topic, or to control queue provisioning.
+
+### Producer Options
+
+**Prefix:** `spring.cloud.stream.solace.bindings.<bindingName>.producer.*`
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `destination-type` | String (`topic`/`queue`) | `topic` | Type of Solace destination. `topic` = publish to a topic. `queue` = send directly to a queue matching the `destination` name |
+| `provision-durable-queue` | boolean | `true` | Auto-provision the queue when `destination-type` is `queue`. Set to `false` if the queue is pre-provisioned |
+| `add-destination-as-subscription-to-queue` | boolean | `true` | Add the destination as a subscription to the provisioned queue |
+| `queue-name-expression` | SpEL String | `"'scst/...'..."` | SpEL expression for generating the producer queue name. Only applies when `destination-type: queue` |
+| `queue-access-type` | int | `0` | Access type for provisioned queues: `0` = non-exclusive, `1` = exclusive |
+| `queue-permission` | int | `2` | Permissions for provisioned queues. See [PERMISSION_ constants](https://docs.solace.com/API-Developer-Online-Ref-Documentation/java/constant-values.html) |
+| `queue-discard-behaviour` | String | `null` | Whether to notify sender if message fails to enqueue. `null` = use broker default |
+| `queue-max-msg-redelivery` | int | `null` | Max redelivery count for the queue. `0` = retry forever |
+| `queue-max-msg-size` | long | `null` | Maximum message size for the provisioned queue |
+| `queue-quota` | long | `null` | Message spool quota (MB) for the provisioned queue |
+| `queue-respect-msg-ttl` | boolean | `null` | Whether the provisioned queue respects Message TTL |
+| `queue-additional-subscriptions` | Map<String,String[]> | `{}` | Map of consumer groups to additional topic subscriptions applied on each group's queue |
+| `header-exclusion` | List\<String\> | `[]` | Headers to exclude from published messages |
+| `header-type-compatibility` | String | `native_only` | Header serialization mode: `native_only` (throw on unsupported types) or `serialize_and_encode_non_native_types` |
+| `non-serializable-header-convert-to-string` | boolean | `false` | Convert non-serializable headers to strings instead of throwing an error |
+| `payload-type-compatibility` | String | `native_only` | Payload serialization mode: `native_only` or `serialize_non_native_types` |
+| `transacted` | boolean | `false` | Deliver messages using local transactions |
+| `header-name-mapping` | Map<String,String> | `{}` | Map Spring header names → Solace user property names. Use to avoid clobbering reserved Spring headers like `id`, `timestamp`, `contentType`, etc. |
+
+> [!IMPORTANT]
+> By default, the Solace binder publishes to a **topic**. The `destination` in your binding is treated as a topic name. To send directly to a Solace **queue**, you **must** set `destination-type: queue`.
+
+> [!TIP]
+> When `destination-type` is `queue`, the `destination` value is used as the **exact queue name** — no naming prefix or generation logic is applied. This is different from consumer bindings where `queueNameExpression` controls the generated name.
+
+**Example — Sending to a Solace queue:**
+
+```yaml
+spring:
+  cloud:
+    stream:
+      bindings:
+        output-4:
+          destination: MY.TARGET.QUEUE    # Queue name on the Solace broker
+          binder: solace1
+      solace:
+        bindings:
+          output-4:
+            producer:
+              destination-type: queue          # Send directly to the queue
+              provision-durable-queue: true     # Auto-create if it doesn't exist
+```
+
+> [!TIP]
+> When `destination-type` is `queue`, the `destination` value is used as the **exact queue name** — no naming prefix or generation logic is applied.
+
+---
+
+## 8. Solace Connector — Workflow Configuration
 
 **Per-workflow prefix:** `solace.connector.workflows.<N>.*`
 **Default prefix (applies to all workflows):** `solace.connector.default.workflow.*`
@@ -554,7 +621,7 @@ solace:
 
 ---
 
-## 8. Solace Connector — Security
+## 9. Solace Connector — Security
 
 **Prefix:** `solace.connector.security.*`
 
@@ -596,7 +663,7 @@ SOLACE_CONNECTOR_SECURITY_USERS_1_ROLES_0=admin
 
 ---
 
-## 9. Solace Connector — Management & Leader Election
+## 10. Solace Connector — Management & Leader Election
 
 **Prefix:** `solace.connector.management.*`
 
@@ -655,7 +722,7 @@ solace:
 
 ---
 
-## 10. Spring SSL Bundles
+## 11. Spring SSL Bundles
 
 **Prefix:** `spring.ssl.bundle.jks.*`
 
@@ -697,7 +764,7 @@ ibm:
 
 ---
 
-## 11. Spring Actuator / Management Endpoint
+## 12. Spring Actuator / Management Endpoint
 
 **Prefix:** `management.*`
 
@@ -717,6 +784,32 @@ ibm:
 | `metrics` | `/actuator/metrics` | Micrometer metrics |
 | `leaderelection` | `/actuator/leaderelection` | Leader election status (custom Solace endpoint) |
 
+### Solace Binder Health Statuses
+
+The Solace binder reports the following health statuses at `/actuator/health`:
+
+| Status | HTTP Code | Meaning |
+|---|---|---|
+| `UP` | 200 | Binder is connected and functioning normally |
+| `RECONNECTING` | 200 | Binder is actively trying to reconnect to the broker. Custom status — returns 200 by default |
+| `DOWN` | 503 | Binder has exhausted reconnection attempts. User intervention is likely required |
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `management.health.binders.enabled` | boolean | `true` | Enable or disable binder health reporting in the health endpoint |
+
+> [!TIP]
+> To expose detailed health status (not just `UP`/`DOWN`), set `management.endpoint.health.show-details: always` and include `health` in `endpoints.web.exposure.include`.
+
+### Solace Binder Metrics
+
+When the `metrics` actuator endpoint is enabled, the Solace binder exposes these metrics (requires Micrometer on classpath):
+
+| Metric | Type | Tags | Description |
+|---|---|---|---|
+| `solace.message.size.payload` | DistributionSummary (bytes) | `name=<bindingName>` | Payload size of messages received (consumer) or published (producer) |
+| `solace.message.size.total` | DistributionSummary (bytes) | `name=<bindingName>` | Total message size of messages received or published |
+
 **Example:**
 
 ```yaml
@@ -734,7 +827,7 @@ management:
 
 ---
 
-## 12. Logging
+## 13. Logging
 
 **Prefix:** `logging.*`
 
@@ -770,7 +863,7 @@ logging:
 
 ---
 
-## 13. JVM System Properties
+## 14. JVM System Properties
 
 Set via the `JDK_JAVA_OPTIONS` environment variable (or `JAVA_TOOL_OPTIONS`).
 
@@ -798,7 +891,7 @@ env:
 
 ---
 
-## 14. Environment Variable Overrides
+## 15. Environment Variable Overrides
 
 Any YAML property can be overridden via environment variables. This is the recommended approach for sensitive values.
 
@@ -829,7 +922,7 @@ SPRING_CLOUD_STREAM_BINDERS_SOLACE1_ENVIRONMENT_SOLACE_JAVA_HOST
 
 ---
 
-## 15. Spring Profiles & Config Locations
+## 16. Spring Profiles & Config Locations
 
 ### Spring Profiles
 
@@ -951,6 +1044,55 @@ logging:
 
 ---
 
+## Solace Message Headers Reference
+
+The Solace binder exposes Solace message properties as Spring message headers. These are useful when writing SpEL transform expressions in workflow configs.
+
+**Prefix:** `solace_` (e.g. `solace_priority`)
+
+### Solace Message Headers (`solace_*`)
+
+| Header | Type | R/W | Description |
+|---|---|---|---|
+| `solace_applicationMessageId` | String | R/W | Application-specific message ID (maps to `JMSMessageID`) |
+| `solace_applicationMessageType` | String | R/W | Application message type (maps to `JMSType`) |
+| `solace_correlationId` | String | R/W | Correlation ID for request/reply messaging |
+| `solace_deliveryCount` | Integer | R | Number of times this message has been delivered |
+| `solace_destination` | Destination | R | The topic/queue this message was published to |
+| `solace_discardIndication` | Boolean | R | Whether messages were discarded prior to this one |
+| `solace_dmqEligible` | Boolean | R/W | Whether the message is eligible to be moved to a Dead Message Queue |
+| `solace_expiration` | Long | R/W | UTC expiry time of the message (milliseconds since epoch) |
+| `solace_httpContentEncoding` | String | R/W | HTTP content encoding (from HTTP client interaction) |
+| `solace_httpContentType` | String | R/W | HTTP content type (from HTTP client interaction) |
+| `solace_isReply` | Boolean | R/W | Whether this message is a reply |
+| `solace_priority` | Integer | R/W | Message priority (0–255, or -1 if not set) |
+| `solace_receiveTimestamp` | Long | R | Time the message was received (ms since epoch) |
+| `solace_redelivered` | Boolean | R | Indicates if this message has been delivered before |
+| `solace_replyTo` | Destination | R/W | Reply-to destination |
+| `solace_senderId` | String | R/W | Sender identifier |
+| `solace_senderTimestamp` | Long | R/W | Send timestamp (ms since epoch) |
+| `solace_sequenceNumber` | Long | R/W | Message sequence number |
+| `solace_timeToLive` | Long | R/W | Milliseconds before message is discarded or moved to DMQ |
+| `solace_userData` | byte[] | R/W | Application-specific user data attached to the message |
+| `solace_replicationGroupMessageId` | ReplicationGroupMessageId | R | Replication group message ID (used as replay start location) |
+
+### Solace Binder Headers (`solace_scst_*`)
+
+These are internal binder headers for controlling binder behavior:
+
+| Header | Type | R/W | Description |
+|---|---|---|---|
+| `solace_scst_partitionKey` | String | W | Partition key for PubSub+ partitioned queues |
+| `solace_scst_targetDestinationType` | String (`topic`/`queue`) | W | Override producer `destination-type` for a single message. Only applies when `scst_targetDestination` is set |
+| `solace_scst_confirmCorrelation` | CorrelationData | W | Publisher confirmation correlation data. Use `.getFuture().get()` to wait for broker ack |
+| `solace_scst_messageVersion` | Integer | R | Binder message version (currently `1`) |
+| `solace_scst_nullPayload` | Boolean | R | Present and `true` when the PubSub+ message payload was null |
+
+> [!NOTE]
+> `R` = readable by consumer handlers, `W` = writable by producer handlers. The `scst_targetDestination` (standard Spring Cloud Stream header) can be set to redirect messages to a different destination at runtime.
+
+---
+
 ## Official Documentation Links
 
 | Topic | URL |
@@ -968,3 +1110,6 @@ logging:
 | Spring Cloud Stream Docs | https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/ |
 | Spring Boot Externalized Config | https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config |
 | IBM MQ WMQConstants | https://www.ibm.com/docs/en/ibm-mq/9.2?topic=jms-wmqconstants |
+| Solace Spring Cloud Stream Binder | https://github.com/SolaceProducts/solace-spring-cloud/tree/master/solace-spring-cloud-starters/solace-spring-cloud-stream-starter |
+| Solace Spring Cloud Stream Properties | https://github.com/SolaceProducts/solace-spring-cloud/blob/master/solace-spring-cloud-stream-binder/solace-spring-cloud-stream-binder-core/src/main/java/com/solace/spring/cloud/stream/binder/properties/ |
+| Solace Message Headers (SolaceHeaders) | https://github.com/SolaceProducts/solace-spring-cloud/blob/master/solace-spring-cloud-stream-binder/solace-spring-cloud-stream-binder-core/src/main/java/com/solace/spring/cloud/stream/binder/messaging/SolaceHeaders.java |
