@@ -2,10 +2,7 @@
 
 > **Complete reference** for every key and value available in the connector's `application.yml`.
 >
-> **Docker image:** `solace/solace-pubsub-connector-ibmmq:2.13.0`
-
-> [!IMPORTANT]
-> **Verification status.** Rows and sections marked **🟡 [unverified]** have not been confirmed against the JAR bundled in connector `2.13.0` — they were sourced from `master`-branch code or web docs and may drift. Before relying on an unverified entry, run the checks in the [Verification Checklist](#verification-checklist).
+> **Docker image:** `solace/solace-pubsub-connector-ibmmq:2.9.12`
 
 ---
 
@@ -30,7 +27,6 @@
 - [15. Environment Variable Overrides](#15-environment-variable-overrides)
 - [16. Spring Profiles & Config Locations](#16-spring-profiles--config-locations)
 - [Solace Message Headers Reference](#solace-message-headers-reference)
-- [Verification Checklist](#verification-checklist)
 
 ---
 
@@ -205,8 +201,8 @@ application.yml
 | `client-name` | String | _(auto)_ | Client name identifier. Auto-generated if omitted |
 | `connect-retries` | int | `-1` | Number of times to retry connecting. `-1` = retry forever |
 | `reconnect-retries` | int | `-1` | Number of times to retry reconnecting after disconnect. `-1` = retry forever |
-| `connect-retries-per-host` 🟡 [unverified] | int | `0` | Number of connection retries per host before moving to the next host in the list |
-| `reconnect-retry-wait-in-millis` 🟡 [unverified] | int | `3000` | Wait time (ms) between reconnection attempts |
+| `connect-retries-per-host` | int | `0` | Number of connection retries per host before moving to the next host in the list |
+| `reconnect-retry-wait-in-millis` | int | `3000` | Wait time (ms) between reconnection attempts |
 
 ### Solace API Properties (`api-properties`)
 
@@ -214,30 +210,27 @@ application.yml
 
 These are passed **verbatim** to the Solace JCSMP API. Keys must match [JCSMPProperties constants](https://docs.solace.com/API-Developer-Online-Ref-Documentation/java/constant-values.html) exactly (UPPER_SNAKE_CASE).
 
-> [!NOTE]
-> **🟡 Defaults are JCSMP-version-dependent.** The default values below are taken from common JCSMP releases but have **not** been cross-checked against the exact JCSMP library bundled in connector `2.13.0`. For authoritative defaults, consult the [JCSMPProperties constants page](https://docs.solace.com/API-Developer-Online-Ref-Documentation/java/constant-values.html) for the library version your connector ships (or introspect the JAR). The *key names* listed are stable API constants; the *defaults* are the risk.
-
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `SSL_VALIDATE_CERTIFICATE` | boolean | `true` 🟡 | Validate the broker's server certificate |
-| `SSL_VALIDATE_CERTIFICATE_DATE` | boolean | `true` 🟡 | Validate the certificate's expiry date |
+| `SSL_VALIDATE_CERTIFICATE` | boolean | `true` | Validate the broker's server certificate |
+| `SSL_VALIDATE_CERTIFICATE_DATE` | boolean | `true` | Validate the certificate's expiry date |
 | `SSL_TRUST_STORE` | String | _(none)_ | Absolute path to JKS trust store file |
 | `SSL_TRUST_STORE_PASSWORD` | String | _(none)_ | Password for the trust store |
 | `SSL_CIPHER_SUITES` | String | _(all)_ | Comma-separated list of allowed TLS cipher suites |
 | `SSL_KEY_STORE` | String | _(none)_ | Path to client key store (for mutual TLS) |
 | `SSL_KEY_STORE_PASSWORD` | String | _(none)_ | Password for the client key store |
-| `SSL_KEY_STORE_FORMAT` | String | `JKS` 🟡 | Key store format (`JKS`, `PKCS12`) |
-| `SSL_TRUST_STORE_FORMAT` | String | `JKS` 🟡 | Trust store format |
+| `SSL_KEY_STORE_FORMAT` | String | `JKS` | Key store format (`JKS`, `PKCS12`) |
+| `SSL_TRUST_STORE_FORMAT` | String | `JKS` | Trust store format |
 | `SSL_EXCLUDED_PROTOCOLS` | String | _(none)_ | Comma-separated list of TLS protocols to exclude |
-| `REAPPLY_SUBSCRIPTIONS` | boolean | `false` 🟡 | Re-apply topic subscriptions after reconnect |
-| `GENERATE_SEND_TIMESTAMPS` | boolean | `false` 🟡 | Include send timestamps in published messages |
-| `GENERATE_RCV_TIMESTAMPS` | boolean | `false` 🟡 | Include receive timestamps |
-| `GENERATE_SEQUENCE_NUMBERS` | boolean | `false` 🟡 | Include sequence numbers in published messages |
-| `PUB_ACK_WINDOW_SIZE` | int | `1` 🟡 | Number of messages that can be published without acknowledgment |
-| `SUB_ACK_WINDOW_SIZE` | int | `255` 🟡 | Flow control: number of messages the broker can send before waiting for ack |
-| `CLIENT_CHANNEL_PROPERTIES.keepAliveIntervalInMillis` | int | `3000` 🟡 | Keep-alive interval (ms) |
-| `CLIENT_CHANNEL_PROPERTIES.connectTimeoutInMillis` | int | `30000` 🟡 | Connection timeout (ms) |
-| `CLIENT_CHANNEL_PROPERTIES.compressionLevel` | int | `0` 🟡 | Compression level (0–9, 0 = off) |
+| `REAPPLY_SUBSCRIPTIONS` | boolean | `false` | Re-apply topic subscriptions after reconnect |
+| `GENERATE_SEND_TIMESTAMPS` | boolean | `false` | Include send timestamps in published messages |
+| `GENERATE_RCV_TIMESTAMPS` | boolean | `false` | Include receive timestamps |
+| `GENERATE_SEQUENCE_NUMBERS` | boolean | `false` | Include sequence numbers in published messages |
+| `PUB_ACK_WINDOW_SIZE` | int | `1` | Number of messages that can be published without acknowledgment |
+| `SUB_ACK_WINDOW_SIZE` | int | `255` | Flow control: number of messages the broker can send before waiting for ack |
+| `CLIENT_CHANNEL_PROPERTIES.keepAliveIntervalInMillis` | int | `3000` | Keep-alive interval (ms) |
+| `CLIENT_CHANNEL_PROPERTIES.connectTimeoutInMillis` | int | `30000` | Connection timeout (ms) |
+| `CLIENT_CHANNEL_PROPERTIES.compressionLevel` | int | `0` | Compression level (0–9, 0 = off) |
 
 > [!NOTE]
 > `api-properties` keys take the form `PROPERTY_NAME` (the JCSMP constant name). Sub-properties use dot notation, e.g. `CLIENT_CHANNEL_PROPERTIES.keepAliveIntervalInMillis`.
@@ -368,12 +361,9 @@ spring:
 
 **Solace binder-level options** (set under `spring.cloud.stream.solace.binder.*`):
 
-> [!NOTE]
-> **🟡 Unverified.** The `session-initialization-strategy` row below could not be independently confirmed in public Solace docs or search. The key name, values, and default are plausible but may not exist or may differ in connector `2.13.0`. Confirm via the bundled JAR's `spring-configuration-metadata.json` before relying on it.
-
 | Key | Type | Values | Default | Description |
 |---|---|---|---|---|
-| `session-initialization-strategy` 🟡 [unverified] | String | `eager` / `lazy` | `eager` | When to create the Solace session. `eager` = immediately on startup. `lazy` = on first binding activation |
+| `session-initialization-strategy` | String | `eager` / `lazy` | `eager` | When to create the Solace session. `eager` = immediately on startup. `lazy` = on first binding activation |
 
 > [!NOTE]
 > You must always include the `undefined` binder:
@@ -457,15 +447,12 @@ jms-binder:
 **Prefix:** `spring.cloud.stream.jms.bindings.<bindingName>.consumer.*`
 **Default prefix (applies to all JMS consumers):** `spring.cloud.stream.jms.default.consumer.*`
 
-> [!NOTE]
-> **🟡 Defaults below are unverified against 2.13.0.** The [IBM MQ JMS Destination Types](https://docs.solace.com/Micro-Integrations/Self-Managed/IBM-MQ/IBMMQ-JMS-Destination-Types.htm) page documents `destination-type` but does not publish concrete defaults for `batch-max-size`, `transacted`, or the `durable-subscription-name` auto-create behavior. Confirm via `spring-configuration-metadata.json` from the bundled JAR.
-
 | Key | Type | Values | Default | Description |
 |---|---|---|---|---|
-| `batch-max-size` | int | `>= 1` | `255` 🟡 | Max messages per batch. Set to `1` to disable batching. If any message in a batch fails, **all messages in the batch are rejected** |
-| `transacted` | boolean | `true` / `false` | `true` 🟡 | Receive messages within a local JMS transaction. Set to `false` to improve performance, especially when `batch-max-size=1` |
+| `batch-max-size` | int | `>= 1` | `255` | Max messages per batch. Set to `1` to disable batching. If any message in a batch fails, **all messages in the batch are rejected** |
+| `transacted` | boolean | `true` / `false` | `true` | Receive messages within a local JMS transaction. Set to `false` to improve performance, especially when `batch-max-size=1` |
 | `destination-type` | String | `queue` / `topic` / `unknown` | `unknown` | Type of JMS destination. `queue` = physical queue (no JNDI lookup). `topic` = physical topic (requires `durable-subscription-name`). `unknown` = JNDI name lookup |
-| `durable-subscription-name` 🟡 [auto-create unverified] | String | any | _(none)_ | Name of a shared durable subscription. **Required** when `destination-type` is `topic`. The subscription is auto-created if it doesn't exist |
+| `durable-subscription-name` | String | any | _(none)_ | Name of a shared durable subscription. **Required** when `destination-type` is `topic`. The subscription is auto-created if it doesn't exist |
 
 **Standard Spring Cloud Stream consumer prefix:** `spring.cloud.stream.bindings.<bindingName>.consumer.*`
 
@@ -529,29 +516,16 @@ spring:
 
 These properties configure the **Solace binder** side of a binding. Use them when you need the Solace binder to send to a **queue** instead of a topic, or to control queue provisioning.
 
-> [!IMPORTANT]
-> **Micro-Integration framework overrides.** The Solace MI framework overrides several Solace binder defaults so that queues must be pre-provisioned on the broker. The table below shows the **MI-effective defaults**, not the raw binder defaults:
->
-> | Property | Stock binder default | MI default |
-> |---|---|---|
-> | `provision-durable-queue` (consumer & producer) | `true` | `false` |
-> | `provision-error-queue` (consumer) | `true` | `false` |
-> | `add-destination-as-subscription-to-queue` (consumer) | `true` | `false` |
-
 ### Producer Options
 
 **Prefix:** `spring.cloud.stream.solace.bindings.<bindingName>.producer.*`
 
-> [!NOTE]
-> **⚠ Partially verified.** Entries marked **🟡 [unverified]** were sourced from the `master` branch of [solace-spring-cloud](https://github.com/SolaceProducts/solace-spring-cloud) and may not match exactly what's shipped in connector `2.13.0`. The deprecation notes (removal in `6.0.0`) come from the same source — confirm against the bundled JAR's `@Deprecated` annotations before relying on them. See [Verification Checklist](#verification-checklist).
-
 | Key | Type | Default | Description |
 |---|---|---|---|
 | `destination-type` | String (`topic`/`queue`) | `topic` | Type of Solace destination. `topic` = publish to a topic. `queue` = send directly to a queue matching the `destination` name |
-| `provision-durable-queue` | boolean | `false` (MI override) | Auto-provision the queue when `destination-type` is `queue`. MI framework defaults this to `false` — pre-provision on the broker, or explicitly set `true` |
+| `provision-durable-queue` | boolean | `true` | Auto-provision the queue when `destination-type` is `queue`. Set to `false` if the queue is pre-provisioned |
 | `add-destination-as-subscription-to-queue` | boolean | `true` | Add the destination as a subscription to the provisioned queue |
 | `queue-name-expression` | SpEL String | `"'scst/...'..."` | SpEL expression for generating the producer queue name. Only applies when `destination-type: queue` |
-| `queue-name-expressions-for-required-groups` 🟡 [unverified] | Map<String,String> | `{}` | Per-group SpEL expressions that override `queue-name-expression` for specific required groups |
 | `queue-access-type` | int | `0` | Access type for provisioned queues: `0` = non-exclusive, `1` = exclusive |
 | `queue-permission` | int | `2` | Permissions for provisioned queues. See [PERMISSION_ constants](https://docs.solace.com/API-Developer-Online-Ref-Documentation/java/constant-values.html) |
 | `queue-discard-behaviour` | String | `null` | Whether to notify sender if message fails to enqueue. `null` = use broker default |
@@ -561,9 +535,9 @@ These properties configure the **Solace binder** side of a binding. Use them whe
 | `queue-respect-msg-ttl` | boolean | `null` | Whether the provisioned queue respects Message TTL |
 | `queue-additional-subscriptions` | Map<String,String[]> | `{}` | Map of consumer groups to additional topic subscriptions applied on each group's queue |
 | `header-exclusion` | List\<String\> | `[]` | Headers to exclude from published messages |
-| `header-type-compatibility` 🟡 [unverified] | String | `native_only` | **Deprecated — scheduled for removal in 6.0.0.** Header serialization mode: `native_only` (throw on unsupported types) or `serialize_and_encode_non_native_types` |
-| `non-serializable-header-convert-to-string` 🟡 [unverified] | boolean | `false` | **Deprecated — scheduled for removal in 6.0.0.** Convert non-serializable headers to strings instead of throwing an error |
-| `payload-type-compatibility` 🟡 [unverified] | String | `native_only` | **Deprecated — scheduled for removal in 6.0.0.** Payload serialization mode: `native_only` or `serialize_non_native_types` |
+| `header-type-compatibility` | String | `native_only` | Header serialization mode: `native_only` (throw on unsupported types) or `serialize_and_encode_non_native_types` |
+| `non-serializable-header-convert-to-string` | boolean | `false` | Convert non-serializable headers to strings instead of throwing an error |
+| `payload-type-compatibility` | String | `native_only` | Payload serialization mode: `native_only` or `serialize_non_native_types` |
 | `transacted` | boolean | `false` | Deliver messages using local transactions |
 | `header-name-mapping` | Map<String,String> | `{}` | Map Spring header names → Solace user property names. Use to avoid clobbering reserved Spring headers like `id`, `timestamp`, `contentType`, etc. |
 
@@ -591,52 +565,8 @@ spring:
               provision-durable-queue: true     # Auto-create if it doesn't exist
 ```
 
-### Consumer Options
-
-**Prefix:** `spring.cloud.stream.solace.bindings.<bindingName>.consumer.*`
-
-> [!WARNING]
-> **⚠ Unverified against connector 2.13.0.** This entire subsection was derived from [solace-spring-cloud `master`](https://github.com/SolaceProducts/solace-spring-cloud) and has **not** been confirmed against the JAR actually bundled in the `2.13.0` Docker image. Expect some drift on:
-> - Exact **kebab-case key names** Spring's relaxed binding will accept (e.g. `batch-max-size` vs `batchMaxSize`)
-> - **Defaults** that may differ between the `master` snapshot and the version pinned by connector `2.13.0`
-> - **Applicability** to MI workflows — e.g. `polled-consumer-wait-time-in-millis` applies only to polled consumers, which MI workflows do not use
-> - Whether **error-queue properties** are honored by the MI framework at all (MI may not expose binder-level error-queue support)
->
-> Before relying on this table, confirm each row against the bundled JAR's `spring-configuration-metadata.json` or a running instance. See [Verification Checklist](#verification-checklist).
-
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `endpoint-type` 🟡 [unverified] | String (`queue`/`topic`) | `queue` | Type of Solace endpoint the consumer binds to |
-| `queue-name-expression` 🟡 [unverified] | SpEL String | `"'scst/...'..."` | SpEL expression for generating the consumer queue name |
-| `queue-additional-subscriptions` 🟡 [unverified] | String[] | `[]` | Extra topic subscriptions applied to the consumer queue |
-| `provision-durable-queue` | boolean | `false` (MI override) | Auto-provision the consumer queue. MI framework defaults this to `false` — pre-provision on the broker |
-| `add-destination-as-subscription-to-queue` | boolean | `false` (MI override) | Add the binding's `destination` as a subscription on the queue. MI framework defaults this to `false` |
-| `queue-access-type` 🟡 [unverified] | int | `0` | `0` = non-exclusive, `1` = exclusive |
-| `selector` 🟡 [unverified] | String | `null` | JMS-style message selector expression to filter received messages |
-| `batch-max-size` 🟡 [unverified] | int | `255` | Max messages per batch when consuming in batch mode. `1` disables batching |
-| `batch-timeout` 🟡 [unverified] | int (ms) | `5000` | Max time to wait for a batch to fill before delivery |
-| `batch-wait-strategy` 🟡 [unverified] | String | `RESPECT_TIMEOUT` | How the binder waits for a batch: `RESPECT_TIMEOUT` or `IMMEDIATE` |
-| `polled-consumer-wait-time-in-millis` 🟡 [unverified] | int | `100` | Poll wait time (ms) for polled consumers — **likely not applicable to MI workflows** |
-| `header-exclusions` 🟡 [unverified] | List\<String\> | `[]` | Headers to strip from incoming messages before delivery |
-| `header-name-mapping` 🟡 [unverified] | Map<String,String> | `{}` | Map Solace user property names → Spring header names |
-
-**Error queue options** 🟡 [unverified — entire group] (consumer-side, applied when `auto-bind-error-queue: true`):
-
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `auto-bind-error-queue` | boolean | `false` | Bind a companion error queue for failed/rejected messages |
-| `provision-error-queue` | boolean | `false` (MI override) | Auto-provision the error queue. MI framework defaults this to `false` |
-| `error-queue-name-expression` | SpEL String | `"'scst/error/...'..."` | SpEL expression for generating the error queue name |
-| `error-queue-max-delivery-attempts` | long | `3` | Number of delivery attempts before a message is routed to the error queue |
-| `error-queue-access-type` | int | `0` (non-exclusive) | Access type for the provisioned error queue |
-| `error-queue-permission` | int | `2` (consume) | Permissions for the provisioned error queue |
-| `error-queue-discard-behaviour` | Integer | `null` | Discard behavior for the error queue |
-| `error-queue-max-msg-redelivery` | Integer | `null` | Max redelivery count for the error queue |
-| `error-queue-max-msg-size` | Integer | `null` | Maximum message size for the error queue |
-| `error-queue-quota` | Integer | `null` | Message spool quota (MB) for the error queue |
-| `error-queue-respects-msg-ttl` | Boolean | `null` | Whether the error queue respects Message TTL |
-| `error-msg-dmq-eligible` | Boolean | `null` | Whether messages routed to the error queue are DMQ-eligible |
-| `error-msg-ttl` | Long | `null` | TTL (ms) applied to messages routed to the error queue |
+> [!TIP]
+> When `destination-type` is `queue`, the `destination` value is used as the **exact queue name** — no naming prefix or generation logic is applied.
 
 ---
 
@@ -661,67 +591,6 @@ spring:
 |---|---|
 | `application/vnd.solace.micro-integration.unspecified` | Pass-through, no interpretation |
 | `application/json` | Interpret payload as JSON (enables JSON-based transforms) |
-| `application/xml` | Interpret payload as XML (enables XML-based transforms, including attribute and element-text access) |
-
-### Transform Expression Syntax
-
-> [!WARNING]
-> **⚠ Partially verified.** The overall shape (context variables, accessor patterns, function names) is taken from [Mapping Message Headers and Payloads](https://docs.solace.com/Micro-Integrations/Self-Managed/Message-transforms.htm), but:
-> - **Function signatures** (`#splitString`, `#joinString`, `#convertStringToNumber`) — parameter names and ordering below are an interpretation; confirm against the official docs or a test workflow before relying on them.
-> - The **composed example expressions** below were not executed end-to-end.
-> - `application/xml` is documented but its exact capabilities (schema support, namespaces) are not covered here.
->
-> Treat this section as a quick-start sketch. Validate any expression you actually ship by running it in a test workflow and watching the `/actuator/health` workflow indicator.
-
-Transform expressions are evaluated in a SpEL-like engine with the following context variables:
-
-| Variable | Access | Description |
-|---|---|---|
-| `source['headers']` | read-only | Headers of the incoming message |
-| `source['payload']` | read-only | Payload of the incoming message (structured per `source-payload.content-type`) |
-| `target['headers']` | write-only | Headers of the outgoing message |
-| `target['payload']` | write-only | Payload of the outgoing message |
-| `var` | read/write | Intermediate scratch storage shared across expressions in the same workflow |
-
-**Accessor patterns:**
-
-| Pattern | Example |
-|---|---|
-| Nested element | `source['payload']['book']['title']` |
-| Indexed array | `source['payload']['orderItem'][2]['color']` |
-| XML attribute | `source['payload']['item']['@id']` |
-| XML element text (when the element also has attributes) | `source['payload']['item']['#text']` |
-
-**Built-in functions** (called with `#functionName(...)`):
-
-| Function | Purpose |
-|---|---|
-| `#splitString(delimiter, value)` | Split a string into an array by delimiter |
-| `#joinString(delimiter, ...values)` | Join values into a single string with a delimiter |
-| `#convertStringToNumber(value)` | Convert a string to a numeric value |
-
-**Expression examples:**
-
-```
-# Copy a single header from source to target
-target['headers']['my-header'] = source['headers']['my-header']
-
-# Set a static payload value
-target['payload']['city'] = 'Toronto'
-
-# Copy payload, then modify a field
-target['payload'] = source['payload']
-target['payload']['office'] = 'HQ'
-
-# Build a routing header from multiple payload fields
-target['headers']['routing'] = #joinString('/', source['payload']['airline'], source['payload']['destination'])
-```
-
-> [!IMPORTANT]
-> **Key behaviors:**
-> - Headers do **not** propagate from source to target unless an explicit expression copies them.
-> - If no `target['payload']` expression is present, the source payload is auto-copied to the target.
-> - Element ordering is **not preserved** when applying payload transformations to XML payloads.
 
 **Example:**
 
@@ -914,7 +783,6 @@ ibm:
 | `info` | `/actuator/info` | Build version and metadata |
 | `metrics` | `/actuator/metrics` | Micrometer metrics |
 | `leaderelection` | `/actuator/leaderelection` | Leader election status (custom Solace endpoint) |
-| `workflows` | `/actuator/workflows` | List, inspect, and control workflow state — start / stop / pause / resume (custom Solace endpoint) |
 
 ### Solace Binder Health Statuses
 
@@ -937,13 +805,10 @@ The Solace binder reports the following health statuses at `/actuator/health`:
 
 When the `metrics` actuator endpoint is enabled, the Solace binder exposes these metrics (requires Micrometer on classpath):
 
-> [!NOTE]
-> **🟡 Metric names unverified.** These metric identifiers have not been confirmed against a running `2.13.0` instance. Capture `curl -s http://localhost:8090/actuator/metrics | jq` to get the authoritative list, then look up each metric with `curl -s http://localhost:8090/actuator/metrics/<metric.name>` for its tags and type.
-
 | Metric | Type | Tags | Description |
 |---|---|---|---|
-| `solace.message.size.payload` 🟡 | DistributionSummary (bytes) | `name=<bindingName>` | Payload size of messages received (consumer) or published (producer) |
-| `solace.message.size.total` 🟡 | DistributionSummary (bytes) | `name=<bindingName>` | Total message size of messages received or published |
+| `solace.message.size.payload` | DistributionSummary (bytes) | `name=<bindingName>` | Payload size of messages received (consumer) or published (producer) |
+| `solace.message.size.total` | DistributionSummary (bytes) | `name=<bindingName>` | Total message size of messages received or published |
 
 **Example:**
 
@@ -954,116 +819,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,leaderelection,workflows
+        include: health,info,metrics,leaderelection
   endpoint:
     health:
       show-details: always
-      show-components: always
 ```
-
-### Sample Responses
-
-**`/actuator/leaderelection`** — response varies by leader-election mode:
-
-Standalone:
-```json
-{ "mode": { "type": "standalone", "state": "active" } }
-```
-
-Active-Active:
-```json
-{ "mode": { "type": "active_active", "state": "active" } }
-```
-
-Active-Standby (active instance) — the `source` object only appears when `type` is `active_standby`:
-```json
-{
-  "mode": {
-    "type": "active_standby",
-    "state": "active",
-    "source": {
-      "queue": "management-queue-1",
-      "host": "solace-broker.example.com",
-      "msgVpn": "default"
-    }
-  }
-}
-```
-
-Active-Standby (standby instance) — same shape, with `"state": "standby"`.
-
-**`/actuator/info`** — by default reports only build metadata:
-```json
-{
-  "build": {
-    "version": "<connector version>",
-    "artifact": "<connector artifact>",
-    "name": "<connector name>",
-    "time": "<connector build time>",
-    "group": "<connector group>",
-    "description": "<connector description>",
-    "support": "<support information>"
-  }
-}
-```
-
-**`/actuator/health`** — with `show-components: always` and `show-details: always`, the workflow health indicator is included in the payload with this shape:
-```json
-{
-  "status": "(UP | DOWN)",
-  "components": {
-    "<workflow-id>": {
-      "status": "(UP | DOWN)",
-      "details": {
-        "error": "<error message>"
-      }
-    }
-  }
-}
-```
-
-> [!NOTE]
-> **🟡 Partially verified.** The workflow-component template above is from the [Self-Managed Micro-Integration Health](https://docs.solace.com/Micro-Integrations/Self-Managed/Connector-Health.htm) page. How binder components (Solace / JMS) nest alongside workflows in the same payload — and a concrete `DOWN`/`RECONNECTING` example — are **not** published in the docs. Capture a real payload with `curl` before relying on the exact JSON structure.
-
-Binder components (Solace / JMS) report their status alongside workflows. Possible binder statuses: `UP`, `RECONNECTING` (transient — still returns HTTP 200), `DOWN` (returns HTTP 503), or `UNKNOWN` for third-party binders.
-
-**`/actuator/metrics`** — follows the standard Spring Boot Actuator format. Solace-specific metrics exposed: `solace.message.size.payload` and `solace.message.size.total` (both `DistributionSummary`, tagged `name=<bindingName>`).
-
-**`/actuator/workflows`** — custom Solace endpoint for listing and controlling workflows. Must be included in `management.endpoints.web.exposure.include`.
-
-| Operation | Method | Path | Description |
-|---|---|---|---|
-| List all workflows | `GET` | `/actuator/workflows` | Returns an array of workflow objects (same shape as the single-workflow response below) |
-| Get workflow status | `GET` | `/actuator/workflows/{workflowId}` | Returns the status of a single workflow |
-| Change workflow state | `POST` | `/actuator/workflows/{workflowId}` | Starts, stops, pauses, or resumes a workflow. Empty response body on success |
-
-Single-workflow response:
-```json
-{
-  "id": "<workflowId>",
-  "enabled": true,
-  "state": "running",
-  "inputBindings": ["<input-binding>"],
-  "outputBindings": ["<output-binding>"]
-}
-```
-
-POST request payload for state changes:
-```json
-{ "state": "STARTED | STOPPED | PAUSED | RESUMED" }
-```
-
-Aggregate `state` values returned in responses:
-
-| State | Meaning |
-|---|---|
-| `running` | All bindings report `state="running"` |
-| `stopped` | All bindings report `state="stopped"` |
-| `paused` | All consumer bindings and all pausable producer bindings report `state="paused"` |
-| `unknown` | Bindings are in an inconsistent aggregate state |
-
-> [!NOTE]
-> Pause/resume is only supported for workflows whose consumer side is a Solace binding. In `active_standby` mode, state changes via this endpoint may not persist — the MI's leader-election logic drives workflow lifecycle and can override manual state changes on failover.
 
 ---
 
@@ -1330,70 +1090,6 @@ These are internal binder headers for controlling binder behavior:
 
 > [!NOTE]
 > `R` = readable by consumer handlers, `W` = writable by producer handlers. The `scst_targetDestination` (standard Spring Cloud Stream header) can be set to redirect messages to a different destination at runtime.
-
----
-
-## Verification Checklist
-
-Rows and sections marked **🟡 [unverified]** in this document have not been confirmed against the JAR bundled inside connector `2.13.0`. Most of this content was derived from the `master` branch of [solace-spring-cloud](https://github.com/SolaceProducts/solace-spring-cloud) and the Solace docs website, so drift is possible.
-
-Before relying on any unverified row, run one or more of the checks below.
-
-### 1. Mechanical diff against the bundled property catalog (recommended)
-
-Spring Boot ships a canonical list of every configuration property the application accepts. Diff this against the tables in [Section 7](#7-solace-binding-level-options-consumer--producer) and [Section 8](#8-solace-connector--workflow-configuration):
-
-```bash
-docker pull solace/solace-pubsub-connector-ibmmq:2.13.0
-CID=$(docker create solace/solace-pubsub-connector-ibmmq:2.13.0)
-docker cp "$CID:/app" ./connector-unpacked
-docker rm "$CID"
-
-# Find the main JAR and dump its metadata
-JAR=$(find ./connector-unpacked -name '*.jar' | head -1)
-unzip -p "$JAR" 'META-INF/spring-configuration-metadata.json' \
-  | jq '.properties[] | {name, type, defaultValue, deprecation}'
-```
-
-The `defaultValue` field in each entry is authoritative. `deprecation` is populated for `@Deprecated` fields.
-
-### 2. Live actuator introspection (verifies the JSON samples in [Section 12](#12-spring-actuator--management-endpoint))
-
-```bash
-# Minimal run against a reachable Solace broker + IBM MQ (or stubs)
-docker run --rm -p 8090:8090 \
-  -v "$PWD/application.yml:/app/external/spring/config/application.yml" \
-  solace/solace-pubsub-connector-ibmmq:2.13.0
-
-# In another terminal:
-curl -s http://localhost:8090/actuator | jq
-curl -s http://localhost:8090/actuator/health | jq
-curl -s http://localhost:8090/actuator/info | jq
-curl -s http://localhost:8090/actuator/leaderelection | jq
-curl -s http://localhost:8090/actuator/workflows | jq
-```
-
-### 3. GitHub source spot-check
-
-For any unverified row, open the corresponding `SolaceConsumerProperties.java` / `SolaceProducerProperties.java` / `SolaceCommonProperties.java` in the repo on the tag that matches the Solace Spring Cloud version bundled by `2.13.0` (not `master`) and confirm the field exists with the stated default and annotations.
-
-### 4. Transform-expression smoke test (for [Section 8](#8-solace-connector--workflow-configuration))
-
-Configure one workflow with one expression of each kind (static payload, XML attribute access, `#splitString`, `#joinString`, `var`) against known input and watch:
-
-```yaml
-logging:
-  level:
-    com.solace.connector: DEBUG
-```
-
-If an expression is silently dropped or errors, the workflow component in `/actuator/health` will report `DOWN` with an `error` detail.
-
-### What to update after verifying
-
-If a row checks out, drop the **🟡 [unverified]** tag on that row.
-If a row is wrong, fix it — and if you find related fields that *should* have been listed, add them.
-If an entire subsection is verified, remove the `> [!WARNING]` / `> [!NOTE]` verification callout at its top.
 
 ---
 
