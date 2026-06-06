@@ -73,7 +73,6 @@ services:
       #SSH connection to CLI
       - '61222:2222'
     volumes:
-#      - hamaster:/run/nas
       - stor-01:/var/lib/solace
       - ./scripts:/run/scripts
       - ./tls.crt:/run/secrets/tls.crt
