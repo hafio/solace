@@ -75,7 +75,7 @@ services:
     volumes:
       - stor-01:/var/lib/solace
       - ./scripts:/run/scripts
-      - ./tls.crt:/run/secrets/tls.crt
+      - ../tls.crt:/run/secrets/tls.crt
     environment:
       routername: xps-ps-01
       #logging_event_output: all
@@ -117,7 +117,7 @@ services:
     volumes:
       - stor-02:/var/lib/solace
       - ./scripts:/run/scripts
-      - ./tls.crt:/run/secrets/tls.crt
+      - ../tls.crt:/run/secrets/tls.crt
     environment:
       routername: xps-ps-02
       << : *def-env
@@ -160,7 +160,7 @@ services:
     volumes:
       - stor-03:/var/lib/solace
       - ./scripts:/run/scripts
-      - ./tls.crt:/run/secrets/tls.crt
+      - ../tls.crt:/run/secrets/tls.crt
     environment:
       routername: xps-ps-03
       << : *def-env
@@ -203,7 +203,7 @@ services:
     volumes:
       - stor-04:/var/lib/solace
       - ./scripts:/run/scripts
-      - ./tls.crt:/run/secrets/tls.crt
+      - ../tls.crt:/run/secrets/tls.crt
     environment:
       routername: xps-ps-04
       << : *def-env

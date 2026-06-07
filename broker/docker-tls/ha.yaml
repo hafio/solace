@@ -8,38 +8,37 @@ x-environment:
   username_admin_globalaccesslevel: admin
   username_admin_password: ${ADMIN_PASSWORD:-admin}
   system_scaling_maxconnectioncount: 100
-  tls_servercertificate_filepath: /secret/server.crt
+  tls_servercertificate_filepath: /run/secret/tls.crt
   redundancy_enable: "yes"
-  redundancy_authentication_presharedkey_key: 'JM2gWU1wU9563gzDYjO3jFA9UJO9QhYVN7SAOFqfGAk='
-  redundancy_group_node_primary_connectvia: primary
-  redundancy_group_node_primary_nodetype: message_routing
-  redundancy_group_node_backup_connectvia: backup
-  redundancy_group_node_backup_nodetype: message_routing
-  redundancy_group_node_monitoring_connectvia: monitoring
-  redundancy_group_node_monitoring_nodetype: monitoring
+  redundancy_authentication_presharedkey_key: 'Y0HPJpLGfU2qJJ9ffgXrVQMu2u6qOlEqwXDybzUiCGIqsfOQVRQ0vzMy/NUnBX73pqgCNwLjm94DTtO5CXF+wgxS0xrfRfg8h/DZVGCij/8DKkBBfLgx17XVYtqFAit4KVYYge84U1UBAeVCTaMeFAVA7K4otDddjQRr14/nsgEylRz1XsaDINkYeFGIf/3QfcVw+ZqmPZ/Rz/uHuG5T5qJ4MFWOw9tuMrIL53B9qJf189+U3kyiqWQcBpq9ktIDhczA5QGFkkvqel73N9VvY9NioMVUK2ORUCaATR7VraNrH5WrXhbKUqtkO2xkDLQ3dG9iKto+4+3qETX+tuAlFw=='
+  redundancy_group_node_sol-pri_connectvia: sol-pri.solxps.handy
+  redundancy_group_node_sol-pri_nodetype: message_routing
+  redundancy_group_node_sol-bkp_connectvia: sol-bkp.solxps.handy
+  redundancy_group_node_sol-bkp_nodetype: message_routing
+  redundancy_group_node_sol-mon_connectvia: sol-mon.solxps.handy
+  redundancy_group_node_sol-mon_nodetype: monitoring
 
 x-common:
   &default-common
-  image: solace-pubsub-enterprise:10.25.0.87
+  image: solace-pubsub-enterprise:10.25.0.200
   shm_size: 1g
-  networks:
-    - hanet
 
 services:
 
-  primary:
-    container_name: primary
-    hostname: primary
+  primary-broker:
+    << : *default-common
+    container_name: sol-pri
+    hostname: sol-pri
     ports:
       - "212:2222"
     volumes:
       - storage-group-1:/var/lib/solace
-      - ./tls-comb.crt:/secret/server.crt
+      - ../tls.crt:/run/secret/tls.crt
     environment:
       << : *default-environment
-      routername: primary
+      routername: sol-pri
       configsync_enable: "yes"
-      redundancy_matelink_connectvia: backup
+      redundancy_matelink_connectvia: sol-bkp.solxps.handy
       redundancy_activestandbyrole: primary
       service_semp_tlsport: 1943
     ulimits:
@@ -47,21 +46,26 @@ services:
       nofile:
         soft: 2448
         hard: 1048576
-    << : *default-common
+    networks:
+      hanet:
+        aliases:
+        - sol-pri.solxps.handy
+        - sol-pri
 
-  backup:
-    container_name: backup
-    hostname: backup
+  backup-broker:
+    << : *default-common
+    container_name: sol-bkp
+    hostname: sol-bkp
     ports:
       - "312:2222"
     volumes:
       - storage-group-2:/var/lib/solace
-      - ./tls-comb.crt:/secret/server.crt
+      - ../tls.crt:/run/secret/tls.crt
     environment:
       << : *default-environment
-      routername: backup
+      routername: sol-bkp
       configsync_enable: "yes"
-      redundancy_matelink_connectvia: primary
+      redundancy_matelink_connectvia: sol-pri.solxps.handy
       redundancy_activestandbyrole: backup
       service_semp_tlsport: 1943
     ulimits:
@@ -69,19 +73,24 @@ services:
       nofile:
         soft: 2448
         hard: 1048576
-    << : *default-common
+    networks:
+      hanet:
+        aliases:
+        - sol-bkp.solxps.handy
+        - sol-bkp
 
-  monitoring:
-    container_name: monitoring
-    hostname: monitoring
+  monitor-broker:
+    << : *default-common
+    container_name: sol-mon
+    hostname: sol-mon
     ports:
       - "412:2222"
     volumes:
       - storage-group-3:/var/lib/solace
-      - ./tls-comb.crt:/secret/server.crt
+      - ../tls.crt:/run/secret/tls.crt
     environment:
       << : *default-environment
-      routername: monitoring
+      routername: sol-mon
       nodetype: monitoring
       service_semp_tlsport: 1943
     ulimits:
@@ -89,7 +98,11 @@ services:
       nofile:
         soft: 2448
         hard: 8192
-    << : *default-common
+    networks:
+      hanet:
+        aliases:
+        - sol-mon.solxps.handy
+        - sol-mon
 
   lb:
     container_name: lb

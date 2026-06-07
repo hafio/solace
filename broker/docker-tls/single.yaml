@@ -6,12 +6,12 @@ services:
     image: solace-pubsub-enterprise:10.25.18.5514
     volumes:
       - "storage-group:/var/lib/solace"
-      - "./tls-comb.crt:/secret/server.crt" 
+      - "../tls.crt:/secret/server.crt" 
     shm_size: 1g
     ulimits:
       core: -1
       nofile: # get values from resource calculator
-        soft: 1024
+        soft: 1
         hard: 1048576
     deploy:
       restart_policy:

@@ -5,8 +5,8 @@ use strict;
 use warnings;
 
 # names of primary and backup message routers
-my $primaryName = "primary";
-my $backupName  = "backup";
+my $primaryName = "sol-pri";
+my $backupName  = "sol-bkp";
 
 sub encodeBase64
 {
