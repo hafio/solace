@@ -1,0 +1,104 @@
+{
+  "realm": "solace",
+  "enabled": true,
+  "displayName": "Solace Realm",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionMaxLifespan": 36000,
+
+  "groups": [
+    {
+      "name": "solace-admin",
+      "path": "/solace-admin"
+    },
+    {
+      "name": "solace-readonly",
+      "path": "/solace-readonly"
+    }
+  ],
+
+  "clients": [
+    {
+      "clientId": "solace-broker",
+      "name": "Solace Broker OIDC Client",
+      "description": "OAuth2/OIDC client for Solace PubSub+ management access",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "sB7!rK2@xQpL9#mNvZ4$wYtU6&dFjH3e",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "fullScopeAllowed": true,
+      "protocolMappers": [
+        {
+          "name": "groups-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "adminkeyclock",
+      "enabled": true,
+      "email": "adminkeyclock@solace.local",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Keycloak",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin@1234",
+          "temporary": true
+        }
+      ],
+      "groups": [
+        "/solace-admin"
+      ]
+    },
+    {
+      "username": "readonlykeyclock",
+      "enabled": true,
+      "email": "readonlykeyclock@solace.local",
+      "emailVerified": true,
+      "firstName": "ReadOnly",
+      "lastName": "Keycloak",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ReadOnly@1234",
+          "temporary": true
+        }
+      ],
+      "groups": [
+        "/solace-readonly"
+      ]
+    }
+  ]
+}
